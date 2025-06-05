@@ -9,13 +9,12 @@ const counters = Object.values(display).flat()
 const get_quotes = async () => {
   const resp = await fetch(useProxy(urls.quotes))
   const data = await resp.json()
-  console.log(data.meta)
   const quotes = data.data.prices.filter(quote => counters.includes(quote.nc))
     .reduce((acc, quote) => {
       acc[quote.nc] = quote
       return acc
     }, {})
-  return quotes
+  return [quotes, data.meta.processedTime]
 }
 
 const columns = [
@@ -29,23 +28,11 @@ const columns = [
       return `<div class="text-violet-400 text-left">${str}</div>`
     }
   },
-  { label: "Last", alias: "lt", format: str => str },
-  {
-    label: "Change", alias: "c", format: str => {
-      str = Number.parseFloat(str)
-      const color = str > 0 ? green : str < 0 ? red : ""
-      return `<div class="${color}" >${str}</div>`
-    }
-  },
-  {
-    label: "%", alias: "p", format: str => {
-      str = Number.parseFloat(str)
-      const color = str > 0 ? green : str < 0 ? red : ""
-      return `<div class="${color}" >${str.toFixed(1)}</div>`
-    }
-  },
-  { label: "High", alias: "h", format: str => str },
-  { label: "Low", alias: "l", format: str => str },
+  { label: "Last", alias: "lt", format: num => num },
+  { label: "Change", alias: "c", format: num => `<div class="${color(num)}" >${num}</div>` },
+  { label: "%", alias: "p", format: num => `<div class="${color(num)}" >${num.toFixed(1)}</div>` },
+  { label: "High", alias: "h", format: num => num },
+  { label: "Low", alias: "l", format: num => num },
 ]
 
 // css classes
@@ -56,3 +43,4 @@ const text = "text-xl/6 text-gray-400 text-right "
 const base = border + padding + text
 const green = "text-emerald-500"
 const red = "text-rose-700"
+const color = num => num > 0 ? green : num < 0 ? red : ""

@@ -10,7 +10,7 @@
 </head>
 
 <body class="bg-black text-white">
-  <div class="p-2" x-data="{quotes:{}}" x-init="quotes =  await get_quotes()">
+  <div class="p-2" x-data="{quotes:{}, time:0 }" x-init="[quotes, time] =  await get_quotes()">
     <table>
       <thead>
         <tr>
@@ -31,6 +31,7 @@
         </tbody>
       </template>
     </table>
+    <div class="py-2" x-text="()=>new Date(time)"></div>
   </div>
 </body>
 
