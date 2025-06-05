@@ -6,7 +6,7 @@ const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 const display = get("display")
 const counters = Object.values(display).flat()
 
-const get_quotes = async () => {
+const getQuotes = async () => {
   const resp = await fetch(useProxy(urls.quotes))
   const data = await resp.json()
   const quotes = data.data.prices.filter(quote => counters.includes(quote.nc))
@@ -15,6 +15,32 @@ const get_quotes = async () => {
       return acc
     }, {})
   return [quotes, data.meta.processedTime]
+}
+
+const updateState = async () => {
+  return await getQuotes()
+}
+
+const data = () => {
+  return {
+    stocks: {},
+    processedTime: 0,
+    intervalTime: 0,
+    intervalId: 0,
+    async updateSelf() {
+      this.intervalTime = new Date().valueOf()
+      if (this.intervalTime - this.processedTime > 80000) {
+        [stocks, time] = await updateState()
+        this.stocks = stocks
+        this.processedTime = time
+        this.intervalTime = new Date().valueOf() // so that no -1 and 0 secs ago
+      }
+    },
+    init() {
+      this.updateSelf()
+      this.intervalId = setInterval(async () => await this.updateSelf(), 1000);
+    }
+  }
 }
 
 const columns = [
@@ -44,3 +70,4 @@ const base = border + padding + text
 const green = "text-emerald-500"
 const red = "text-rose-700"
 const color = num => num > 0 ? green : num < 0 ? red : ""
+const button = "bg-violet-900 hover:bg-violet-400 px-4 rounded-full"

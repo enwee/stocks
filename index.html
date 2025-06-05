@@ -5,34 +5,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="./styles.css" rel="stylesheet">
+  <script defer src="script.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="script.js"></script>
 </head>
 
 <body class="bg-black text-white">
-  <div class="p-2" x-data="{quotes:{}, time:0 }" x-init="[quotes, time] =  await get_quotes()">
-    <table>
-      <thead>
-        <tr>
-          <template x-for="{label} in columns">
-            <th :class="header" x-text="label"></th>
-          </template>
-        </tr>
-      </thead>
-      <template x-if="JSON.stringify(quotes) !== '{}'">
+  <template x-data="data" x-if="JSON.stringify(stocks) !== '{}'">
+    <div class="p-2">
+
+      <table>
+        <thead>
+          <tr>
+            <template x-for="{label} in columns">
+              <th :class="header" x-text="label"></th>
+            </template>
+          </tr>
+        </thead>
         <tbody>
           <template x-for="(symbol, index) in counters">
             <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
               <template x-for="{alias, format} in columns">
-                <td :class="base" x-html="format(quotes[symbol][alias])"></td>
+                <td :class="base" x-html="format(stocks[symbol][alias])"></td>
               </template>
             </tr>
           </template>
         </tbody>
-      </template>
-    </table>
-    <div class="py-2" x-text="()=>new Date(time)"></div>
-  </div>
+      </table>
+
+      <div class="py-2 w-72 inline-flex justify-between">
+        <div>
+          <span x-text="new Date(processedTime).toLocaleTimeString()"></span>
+          <span x-text="new Date(processedTime).toDateString()"></span>
+          <div>
+            <span>last updated</span>
+            <span x-text="Math.floor((intervalTime-processedTime)/1000)"></span>
+            <span>secs ago</span>
+          </div>
+        </div>
+        <button :class="button" @click="clearInterval(intervalId)">STOP</button>
+      </div>
+
+    </div>
+  </template>
 </body>
 
 </html>
