@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link href="./styles.css" rel="stylesheet"> -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<script>
+  async function getFile() {
+    // Open file picker and destructure the result the first handle
+    const [fileHandle] = await window.showOpenFilePicker();
+    const file = await fileHandle.getFile();
+    const reader = new FileReader()
+    reader.readAsText(file)
+    reader.onload = () => {
+      const data = JSON.parse(reader.result)
+      localStorage.clear()
+      for (key in data) {
+        localStorage.setItem(key, JSON.stringify(data[key]))
+      }
+    }
+  }
+</script>
+
+<body>
+  <div x-data="{}">
+    <button @click="getFile">init from file</button>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./styles.css" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script async src="script.js"></script>
+</head>
+
+<body class="bg-black text-white">
+  <div class="p-2" x-data="{quotes:{}}" x-init="quotes =  await get_quotes()">
+    <table>
+      <thead>
+        <tr>
+          <template x-for="{label} in columns">
+            <th :class="header" x-text="label"></th>
+          </template>
+        </tr>
+      </thead>
+      <template x-if="JSON.stringify(quotes) !== '{}'">
+        <tbody>
+          <template x-for="(symbol, index) in counters">
+            <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
+              <template x-for="{alias, format} in columns">
+                <td :class="base" x-html="format(quotes[symbol][alias])"></td>
+              </template>
+            </tr>
+          </template>
+        </tbody>
+      </template>
+    </table>
+  </div>
+</body>
+
+</html>
