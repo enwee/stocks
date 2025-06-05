@@ -17,7 +17,7 @@
     reader.readAsText(file)
     reader.onload = () => {
       const data = JSON.parse(reader.result)
-      localStorage.clear()
+      // localStorage.clear()
       for (key in data) {
         localStorage.setItem(key, JSON.stringify(data[key]))
       }
@@ -27,7 +27,8 @@
 
 <body>
   <div x-data="{}">
-    <button @click="getFile">init from file</button>
+    <button @click="getFile">from file</button>
+    <button @click="localStorage.clear()">clear data</button>
   </div>
 </body>
 

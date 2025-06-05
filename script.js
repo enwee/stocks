@@ -6,6 +6,20 @@ const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 const display = get("display")
 const counters = Object.values(display).flat()
 
+const portfolio = get("portfolio")
+
+const officeHours = () => {
+  const now = new Date()
+  const day = now.getDay()
+  const hour = now.getHours()
+  const minute = now.getMinutes()
+  if (day < 1 || day > 5) { return false }
+  if (hour < 8 || hour > 17) { return false }
+  if (hour == 8 && minute < 30) { return false }
+  if (hour == 17 && minute > 30) { return false }
+  return true
+}
+
 const getQuotes = async () => {
   const resp = await fetch(useProxy(urls.quotes))
   const data = await resp.json()
@@ -18,7 +32,16 @@ const getQuotes = async () => {
 }
 
 const updateState = async () => {
-  return await getQuotes()
+  const [stocks, time] = await getQuotes()
+  for (const symbol in stocks) {
+    stocks[symbol].avg_price =
+      symbol in portfolio ? portfolio[symbol].avg_price : null
+    stocks[symbol].mkt_value =
+      symbol in portfolio ? stocks[symbol].lt * portfolio[symbol].holdings : null
+    stocks[symbol].gain_loss =
+      symbol in portfolio ? (stocks[symbol].lt - portfolio[symbol].avg_price) * portfolio[symbol].holdings : null
+  }
+  return [stocks, time]
 }
 
 const data = () => {
@@ -27,9 +50,9 @@ const data = () => {
     processedTime: 0,
     intervalTime: 0,
     intervalId: 0,
-    async updateSelf() {
+    async updateSelf(initial = false) {
       this.intervalTime = new Date().valueOf()
-      if (this.intervalTime - this.processedTime > 80000) {
+      if (initial || (officeHours() && this.intervalTime - this.processedTime > 80000)) {
         [stocks, time] = await updateState()
         this.stocks = stocks
         this.processedTime = time
@@ -37,7 +60,7 @@ const data = () => {
       }
     },
     init() {
-      this.updateSelf()
+      this.updateSelf(true)
       this.intervalId = setInterval(async () => await this.updateSelf(), 1000);
     }
   }
@@ -55,10 +78,13 @@ const columns = [
     }
   },
   { label: "Last", alias: "lt", format: num => num },
-  { label: "Change", alias: "c", format: num => `<div class="${color(num)}" >${num}</div>` },
-  { label: "%", alias: "p", format: num => `<div class="${color(num)}" >${num.toFixed(1)}</div>` },
+  { label: "Change", alias: "c", format: num => `<div class="${color(num)}">${num}</div>` },
+  { label: "%", alias: "p", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
   { label: "High", alias: "h", format: num => num },
   { label: "Low", alias: "l", format: num => num },
+  { label: "Avg Px", alias: "avg_price", format: num => num ? num.toFixed(2) : "-" },
+  { label: "Mkt Val", alias: "mkt_value", format: num => num ? Math.floor(num).toLocaleString() : "-" },
+  { label: "Gain/Loss", alias: "gain_loss", format: num => num !== null ? `<div class="${color(num)}">${Math.floor(num).toLocaleString()}</div>` : "-" },
 ]
 
 // css classes
