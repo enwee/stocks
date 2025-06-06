@@ -17,18 +17,21 @@
     reader.readAsText(file)
     reader.onload = () => {
       const data = JSON.parse(reader.result)
-      // localStorage.clear()
       for (key in data) {
         localStorage.setItem(key, JSON.stringify(data[key]))
       }
     }
   }
+
 </script>
 
 <body>
-  <div x-data="{}">
-    <button @click="getFile">from file</button>
+  <div x-data="{key:'',value:''}">
     <button @click="localStorage.clear()">clear data</button>
+    <button @click="getFile">from file</button>
+    <input x-model="key" placeholder="key">
+    <input x-model="value" placeholder="value">
+    <button @click="localStorage.setItem(key, value)">store</button>
   </div>
 </body>
 

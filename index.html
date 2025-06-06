@@ -29,10 +29,10 @@
                   <div x-data="{ show: false }"
                     x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? show=!show : null)">
                     <div x-show="show" x-transition:enter="transition ease-out duration-1000"
-                      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                      x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
                       x-html="format(stocks[symbol][alias])"></div>
                     <div x-show="!show" x-transition:enter="transition ease-out duration-1000"
-                      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                      x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
                       x-html="format(stocks[symbol][alias])">
                     </div>
                   </div>
