@@ -9,10 +9,7 @@ const counters = Object.values(display).flat()
 const portfolio = get("portfolio")
 
 const officeHours = () => {
-  const now = new Date()
-  const day = now.getDay()
-  const hour = now.getHours()
-  const minute = now.getMinutes()
+  const now = new Date(), day = now.getDay(), hour = now.getHours(), minute = now.getMinutes()
   if (day < 1 || day > 5) { return false }
   if (hour < 8 || hour > 17) { return false }
   if (hour == 8 && minute < 30) { return false }
@@ -33,33 +30,48 @@ const getQuotes = async () => {
 
 const updateState = async () => {
   const [stocks, time] = await getQuotes()
+  const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
+  const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
-    stocks[symbol].avg_price =
-      symbol in portfolio ? portfolio[symbol].avg_price : null
-    stocks[symbol].mkt_value =
-      symbol in portfolio ? stocks[symbol].lt * portfolio[symbol].holdings : null
-    stocks[symbol].gain_loss =
-      symbol in portfolio ? (stocks[symbol].lt - portfolio[symbol].avg_price) * portfolio[symbol].holdings : null
+    let avg_price, mkt_value, gain_loss = null
+    if (symbol in portfolio) {
+      avg_price = portfolio[symbol].avg_price
+      mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings)
+      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings)
+      totals[type[stocks[symbol].type]].total += mkt_value
+      totals[type[stocks[symbol].type]].gain_loss += gain_loss
+    }
+    stocks[symbol].avg_price = avg_price
+    stocks[symbol].mkt_value = mkt_value
+    stocks[symbol].gain_loss = gain_loss
   }
-  return [stocks, time]
+  totals.monitored.total = totals.reits.total + totals.stocks.total
+  totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
+
+  totals.reits.meta = "USD/SGD"
+  totals.stocks.meta = "SGD/JPY"
+  totals.monitored.meta = "SGD/CNY"
+  return [stocks, time, totals]
 }
 
 const data = () => {
   return {
     stocks: {},
+    totals: {},
     processedTime: 0,
     intervalTime: 0,
     intervalId: 0,
     async updateSelf(initial = false) {
       this.intervalTime = new Date().valueOf()
       if (initial || (officeHours() && this.intervalTime - this.processedTime > 80000)) {
-        [stocks, time] = await updateState()
+        [stocks, time, totals] = await updateState()
         this.stocks = stocks
+        this.totals = totals
         this.processedTime = time
         this.intervalTime = new Date().valueOf() // so that no -1 and 0 secs ago
       }
       // to simulate change in data on every interval update
-      // for (symbol of ["N2IU", "BTOU", "S59"]) {
+      // for (symbol of ["N2IU", "BTOU", "A7RU"]) {
       //   this.stocks[symbol].mkt_value++
       //   this.stocks[symbol].gain_loss++
       //   this.stocks = { ...this.stocks }
@@ -89,9 +101,11 @@ const columns = [
   { label: "High", alias: "h", format: num => num },
   { label: "Low", alias: "l", format: num => num },
   { label: "Avg Px", alias: "avg_price", format: num => num ? num.toFixed(2) : "-" },
-  { label: "Mkt Val", alias: "mkt_value", format: num => num ? Math.floor(num).toLocaleString() : "-" },
-  { label: "Gain/Loss", alias: "gain_loss", format: num => num !== null ? `<div class="${color(num)}">${Math.floor(num).toLocaleString()}</div>` : "-" },
+  { label: "Mkt Val", alias: "mkt_value", format: num => num ? numComma(num) : "-" },
+  { label: "Gain/Loss", alias: "gain_loss", format: num => num !== null ? numComma(num, true) : "-" },
 ]
+
+const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
 // css classes
 const header = "pb-2 px-2 text-gray-400 whitespace-nowrap"

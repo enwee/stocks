@@ -21,26 +21,35 @@
             </template>
           </tr>
         </thead>
-        <tbody>
-          <template x-for="(symbol, index) in counters">
-            <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
-              <template x-for="{alias, format} in columns">
-                <td :class="base">
-                  <div x-data="{ show: false }"
-                    x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? show=!show : null)">
-                    <div x-show="show" x-transition:enter="transition ease-out duration-1000"
-                      x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
-                      x-html="format(stocks[symbol][alias])"></div>
-                    <div x-show="!show" x-transition:enter="transition ease-out duration-1000"
-                      x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
-                      x-html="format(stocks[symbol][alias])">
+        <template x-for="stockType in Object.keys(display)">
+          <tbody>
+            <template x-for="(symbol, index) in display[stockType]">
+              <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
+                <template x-for="{alias, format} in columns">
+                  <td :class="base">
+                    <div x-data="{ show: true }"
+                      x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? show=!show : null)">
+                      <div x-show="show" x-transition:enter="transition ease-out duration-1000"
+                        x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
+                        x-html="format(stocks[symbol][alias])"></div>
+                      <div x-show="!show" x-transition:enter="transition ease-out duration-1000"
+                        x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
+                        x-html="format(stocks[symbol][alias])">
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </template>
+                  </td>
+                </template>
+              </tr>
+            </template>
+            <tr :class="text">
+              <td :class="padding" x-html="`<div class='text-left'>${totals[stockType].meta}</div>`"></td>
+              <td :class=" padding" :colspan="columns.length - 4"></td>
+              <td :class="padding">Total:</td>
+              <td :class="padding" x-html="numComma(totals[stockType].total)"></td>
+              <td :class="padding" x-html="numComma(totals[stockType].gain_loss, true)"></td>
             </tr>
-          </template>
-        </tbody>
+          </tbody>
+        </template>
       </table>
 
       <div class="py-2 w-72 inline-flex justify-between">
