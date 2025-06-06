@@ -58,6 +58,12 @@ const data = () => {
         this.processedTime = time
         this.intervalTime = new Date().valueOf() // so that no -1 and 0 secs ago
       }
+      // to simulate change in data
+      // for (symbol of ["N2IU", "BTOU", "S59"]) {
+      //   this.stocks[symbol].mkt_value++
+      //   this.stocks[symbol].gain_loss++
+      //   this.stocks = { ...this.stocks }
+      // }
     },
     init() {
       this.updateSelf(true)

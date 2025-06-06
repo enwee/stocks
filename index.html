@@ -25,7 +25,18 @@
           <template x-for="(symbol, index) in counters">
             <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
               <template x-for="{alias, format} in columns">
-                <td :class="base" x-html="format(stocks[symbol][alias])"></td>
+                <td :class="base">
+                  <div x-data="{ show: false }"
+                    x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? show=!show : null)">
+                    <div x-show="show" x-transition:enter="transition ease-out duration-1000"
+                      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                      x-html="format(stocks[symbol][alias])"></div>
+                    <div x-show="!show" x-transition:enter="transition ease-out duration-1000"
+                      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                      x-html="format(stocks[symbol][alias])">
+                    </div>
+                  </div>
+                </td>
               </template>
             </tr>
           </template>
@@ -44,7 +55,6 @@
         </div>
         <button :class="button" @click="clearInterval(intervalId)">STOP</button>
       </div>
-
     </div>
   </template>
 </body>
