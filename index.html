@@ -41,12 +41,12 @@
                 </template>
               </tr>
             </template>
-            <tr :class="text">
-              <td :class="padding" x-html="`<div class='text-lg text-left'>${totals[stockType].meta}</div>`"></td>
-              <td :class=" padding" :colspan="columns.length - 4"></td>
-              <td :class="padding">Total:</td>
-              <td :class="padding" x-html="numComma(totals[stockType].total)"></td>
-              <td :class="padding" x-html="numComma(totals[stockType].gain_loss, true)"></td>
+            <tr>
+              <td :class="padding" x-html="`<div>${totals[stockType].meta}</div>`"></td>
+              <td :colspan="columns.length - 4"></td>
+              <td :class="padding + 'text-right'">Total:</td>
+              <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
+              <td :class="padding + text" x-html="numComma(totals[stockType].gain_loss, true)"></td>
             </tr>
           </tbody>
         </template>
