@@ -51,7 +51,7 @@ const updateState = async () => {
   for (const symbol in stocks) {
     let avg_price, mkt_value, gain_loss = null
     if (symbol in portfolio) {
-      const rate = stocks[symbol].n.trimEnd().endsWith("USD") ? rates.SGD : 1
+      const rate = stocks[symbol].n.trim().endsWith("USD") ? rates.SGD : 1
       avg_price = portfolio[symbol].avg_price
       mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings * rate)
       gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings * rate)
