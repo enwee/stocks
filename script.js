@@ -43,8 +43,28 @@ const getRates = async () => {
   return rates
 }
 
+const getFinancials = async () => {
+  let financials = get("financials")
+  if (!financials || // financials.time shifted back 8hrs to get 8am Date change
+    new Date(financials.time - 28800000).toDateString() != new Date(Date.now() - 28800000).toDateString()) {
+    financials = {}
+    for (const symbol of counters) {
+      const resp = await fetch(useProxy(urls.financials.replace("{CODE}", symbol)))
+      const data = (await resp.json()).data[0] || {}
+      for (key in data) {
+        data[key] = data[key] ? Number(data[key]) : data[key]
+      }
+      financials[symbol] = data
+    }
+    financials.time = Date.now()
+    localStorage.setItem("financials", JSON.stringify(financials))
+  }
+  return financials
+}
+
 const updateState = async () => {
   const rates = await getRates()
+  const financials = await getFinancials()
   const [stocks, time] = await getQuotes()
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
@@ -61,7 +81,13 @@ const updateState = async () => {
     stocks[symbol].avg_price = avg_price
     stocks[symbol].mkt_value = mkt_value
     stocks[symbol].gain_loss = gain_loss
+    // what about PE/PB by last done
+    Object.assign(stocks[symbol], financials[symbol])
+    if (stocks[symbol].type == "adrs") {
+      stocks[symbol].sdrInfo = "..."
+    }
   }
+
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
@@ -79,13 +105,13 @@ const data = () => {
     intervalTime: 0,
     intervalId: 0,
     async updateSelf(initial = false) {
-      this.intervalTime = new Date().valueOf()
+      this.intervalTime = Date.now()
       if (initial || (officeHours() && this.intervalTime - this.processedTime > 80000)) {
         [stocks, time, totals] = await updateState()
         this.stocks = stocks
         this.totals = totals
         this.processedTime = time
-        this.intervalTime = new Date().valueOf() // so that no -1 and 0 secs ago
+        this.intervalTime = Date.now() // so that no -1 and 0 secs ago
       }
       // to simulate change in data on every interval update
       // for (symbol of ["N2IU", "BTOU", "A7RU"]) {
@@ -117,6 +143,10 @@ const columns = [
   { label: "%", alias: "p", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
   { label: "High", alias: "h", format: num => num },
   { label: "Low", alias: "l", format: num => num },
+  { label: "52h", alias: "fiftyTwoWeekHigh", format: num => num || "-" },
+  { label: "52l", alias: "fiftyTwoWeekLow", format: num => num || "-" },
+  { label: "P/E", alias: "peRatio", format: num => num ? num.toFixed(2) : "-" },
+  { label: "P/B", alias: "priceBookValue", format: num => num ? num.toFixed(2) : "-" },
   { label: "Avg Px", alias: "avg_price", format: num => num ? num.toFixed(2) : "-" },
   { label: "Mkt Val", alias: "mkt_value", format: num => num ? numComma(num) : "-" },
   { label: "Gain/Loss", alias: "gain_loss", format: num => num !== null ? numComma(num, true) : "-" },
