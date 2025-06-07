@@ -42,7 +42,7 @@
               </tr>
             </template>
             <tr :class="text">
-              <td :class="padding" x-html="`<div class='text-left'>${totals[stockType].meta}</div>`"></td>
+              <td :class="padding" x-html="`<div class='text-lg text-left'>${totals[stockType].meta}</div>`"></td>
               <td :class=" padding" :colspan="columns.length - 4"></td>
               <td :class="padding">Total:</td>
               <td :class="padding" x-html="numComma(totals[stockType].total)"></td>

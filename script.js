@@ -28,16 +28,33 @@ const getQuotes = async () => {
   return [quotes, data.meta.processedTime]
 }
 
+const getRates = async () => {
+  let rates = get("rates")
+  if (!rates || new Date(rates.time).toDateString() != new Date().toDateString()) {
+    rates = {}
+    const resp = await fetch(urls.rates)
+    const data = await resp.json()
+    for (const rate of ["SGD", "JPY", "CNY", "HKD"]) {
+      rates[rate] = data.conversion_rates[rate]
+    }
+    rates.time = data.time_last_update_unix * 1000
+    localStorage.setItem("rates", JSON.stringify(rates))
+  }
+  return rates
+}
+
 const updateState = async () => {
+  const rates = await getRates()
   const [stocks, time] = await getQuotes()
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
     let avg_price, mkt_value, gain_loss = null
     if (symbol in portfolio) {
+      const rate = stocks[symbol].n.trimEnd().endsWith("USD") ? rates.SGD : 1
       avg_price = portfolio[symbol].avg_price
-      mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings)
-      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings)
+      mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings * rate)
+      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings * rate)
       totals[type[stocks[symbol].type]].total += mkt_value
       totals[type[stocks[symbol].type]].gain_loss += gain_loss
     }
@@ -48,9 +65,9 @@ const updateState = async () => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = "USD/SGD"
-  totals.stocks.meta = "SGD/JPY"
-  totals.monitored.meta = "SGD/CNY"
+  totals.reits.meta = `1 USD = ${rates.SGD.toFixed(3)} SGD`
+  totals.stocks.meta = `1 SGD = ${(rates.JPY / rates.SGD).toFixed(2)} JPY`
+  totals.monitored.meta = `10 CNY = ${(rates.SGD / rates.CNY * 10).toFixed(2)} SGD`
   return [stocks, time, totals]
 }
 
