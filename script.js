@@ -65,9 +65,9 @@ const updateState = async () => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1 USD = ${rates.SGD.toFixed(3)} SGD`
-  totals.stocks.meta = `1 SGD = ${(rates.JPY / rates.SGD).toFixed(2)} JPY`
-  totals.monitored.meta = `10 CNY = ${(rates.SGD / rates.CNY * 10).toFixed(2)} SGD`
+  totals.reits.meta = `1USD=${rates.SGD.toFixed(3)}SGD`
+  totals.stocks.meta = `1SGD=${(rates.JPY / rates.SGD).toFixed(2)}JPY`
+  totals.monitored.meta = `10CNY=${(rates.SGD / rates.CNY * 10).toFixed(2)}SGD`
   return [stocks, time, totals]
 }
 
