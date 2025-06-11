@@ -25,12 +25,26 @@
           <tbody>
             <template x-for="(symbol, index) in display[stockType]">
               <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
-                <template x-for="{alias, format} in columns">
-                  <td x-data="{ toggle: true }"
-                    x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
-                    :class="`${base}${toggle?'animate-(--animate-true)':'animate-(--animate-false)'}`">
-                    <div x-html="format(stocks[symbol][alias])"></div>
-                  </td>
+                <template x-for="{label,alias,type,format} in columns">
+                  <div class="contents">
+                    <template x-if="type=='name'">
+                      <td :class="base">
+                        <div x-html="format(stocks[symbol])"></div>
+                      </td>
+                    </template>
+                    <template x-if="type=='default'">
+                      <td :class="base">
+                        <div x-html="format(stocks[symbol][alias])"></div>
+                      </td>
+                    </template>
+                    <template x-if="type=='watched'">
+                      <td x-data="{ toggle: true }"
+                        x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
+                        :class="`${base}${toggle?'animate-(--animate-true)':'animate-(--animate-false)'}`">
+                        <div x-html="format(stocks[symbol][alias])"></div>
+                      </td>
+                    </template>
+                  </div>
                 </template>
               </tr>
             </template>

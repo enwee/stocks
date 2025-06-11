@@ -91,9 +91,9 @@ const updateState = async () => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1USD=${rates.SGD.toFixed(3)}SGD`
-  totals.stocks.meta = `1SGD=${(rates.JPY / rates.SGD).toFixed(2)}JPY`
-  totals.monitored.meta = `10CNY=${(rates.SGD / rates.CNY * 10).toFixed(3)}SGD`
+  totals.reits.meta = `1USD = ${rates.SGD.toFixed(3)}SGD`
+  totals.stocks.meta = `1SGD = ${(rates.JPY / rates.SGD).toFixed(2)}JPY`
+  totals.monitored.meta = `10CNY = ${(rates.SGD / rates.CNY * 10).toFixed(2)}SGD`
   return [stocks, time, totals]
 }
 
@@ -128,27 +128,27 @@ const data = () => {
 
 const columns = [
   {
-    label: "Company Name", alias: "n", format: str => {
-      const words = str.split(" ")
+    label: "Company Name", alias: "n", type: "name", format: ({ n, nc }) => {
+      const words = n.split(" ")
       if (words.length > 2) {
-        str = words.slice(0, 3).join(" ")
-        str = str.length > 16 ? words.slice(0, 2).join(" ") : str
+        n = words.slice(0, 3).join(" ")
+        n = n.length > 16 ? words.slice(0, 2).join(" ") : n
       }
-      return `<div class="text-violet-400 text-left">${str}</div>`
+      return `<div class="text-violet-400 text-left" onclick="window.open('${urls.sgx.replace('{CODE}', nc)}')">${n}</div>`
     }
   },
-  { label: "Last", alias: "lt", format: num => num },
-  { label: "Change", alias: "c", format: num => `<div class="${color(num)}">${num}</div>` },
-  { label: "%", alias: "p", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
-  { label: "High", alias: "h", format: num => num },
-  { label: "Low", alias: "l", format: num => num },
-  { label: "52h", alias: "fiftyTwoWeekHigh", format: num => num || "-" },
-  { label: "52l", alias: "fiftyTwoWeekLow", format: num => num || "-" },
-  { label: "P/E", alias: "peRatio", format: num => num ? num.toFixed(2) : "-" },
-  { label: "P/B", alias: "priceBookValue", format: num => num ? num.toFixed(2) : "-" },
-  { label: "Avg Px", alias: "avg_price", format: num => num ? num.toFixed(2) : "-" },
-  { label: "Mkt Val", alias: "mkt_value", format: num => num ? numComma(num) : "-" },
-  { label: "Gain/Loss", alias: "gain_loss", format: num => num !== null ? numComma(num, true) : "-" },
+  { label: "Last", alias: "lt", type: "watched", format: num => num },
+  { label: "Change", alias: "c", type: "watched", format: num => `<div class="${color(num)}">${num}</div>` },
+  { label: "%", alias: "p", type: "watched", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
+  { label: "High", alias: "h", type: "default", format: num => num },
+  { label: "Low", alias: "l", type: "default", format: num => num },
+  { label: "52h", alias: "fiftyTwoWeekHigh", type: "default", format: num => num || "-" },
+  { label: "52l", alias: "fiftyTwoWeekLow", type: "default", format: num => num || "-" },
+  { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  { label: "Avg Px", alias: "avg_price", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  { label: "Mkt Val", alias: "mkt_value", type: "watched", format: num => num ? numComma(num) : "-" },
+  { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: num => num !== null ? numComma(num, true) : "-" },
 ]
 
 const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`

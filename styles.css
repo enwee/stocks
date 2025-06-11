@@ -171,6 +171,9 @@
   }
 }
 @layer utilities {
+  .contents {
+    display: contents;
+  }
   .inline-flex {
     display: inline-flex;
   }
