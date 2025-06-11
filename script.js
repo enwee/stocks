@@ -93,7 +93,7 @@ const updateState = async () => {
 
   totals.reits.meta = `1USD=${rates.SGD.toFixed(3)}SGD`
   totals.stocks.meta = `1SGD=${(rates.JPY / rates.SGD).toFixed(2)}JPY`
-  totals.monitored.meta = `10CNY=${(rates.SGD / rates.CNY * 10).toFixed(2)}SGD`
+  totals.monitored.meta = `10CNY=${(rates.SGD / rates.CNY * 10).toFixed(3)}SGD`
   return [stocks, time, totals]
 }
 
@@ -114,10 +114,9 @@ const data = () => {
         this.intervalTime = Date.now() // so that no -1 and 0 secs ago
       }
       // to simulate change in data on every interval update
-      // for (symbol of ["N2IU", "BTOU", "A7RU"]) {
+      // for (symbol of Object.keys(portfolio).filter(() => Math.random() < 0.5)) {
       //   this.stocks[symbol].mkt_value++
       //   this.stocks[symbol].gain_loss++
-      //   this.stocks = { ...this.stocks }
       // }
     },
     init() {
