@@ -26,10 +26,15 @@
             <template x-for="(symbol, index) in display[stockType]">
               <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
                 <template x-for="{label,alias,type,format} in columns">
-                  <div class="contents">
+                  <div class="contents align-middle">
                     <template x-if="type=='name'">
                       <td :class="base">
                         <div x-html="format(stocks[symbol])"></div>
+                      </td>
+                    </template>
+                    <template x-if="type=='52w'">
+                      <td :class="base">
+                        <div class="flex items-center justify-center" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                     <template x-if="type=='default'">
@@ -38,9 +43,9 @@
                       </td>
                     </template>
                     <template x-if="type=='watched'">
-                      <td x-data="{ toggle: true }"
-                        x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
-                        :class="`${base}${toggle?'animate-(--animate-true)':'animate-(--animate-false)'}`">
+                      <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]', 
+                        (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
+                        :class="`${base}${blink(toggle)}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
                       </td>
                     </template>
@@ -49,7 +54,7 @@
               </tr>
             </template>
             <tr>
-              <td :class="padding" x-html="`<div>${totals[stockType].meta}</div>`"></td>
+              <td :class="padding + 'text-sm'" x-text="totals[stockType].meta"></td>
               <td :colspan="columns.length - 4"></td>
               <td :class="padding + 'text-right'">Total:</td>
               <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
