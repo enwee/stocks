@@ -36,13 +36,13 @@ const getQuotes = async () => {
 }
 
 const getRates = async () => {
-  let rates = get("rates...")
+  let rates = get("rates")
   if (!rates || beforeToday8am(rates.time)) {
     console.log(`getting rates...`)
     rates = {}
     const resp = await fetch(urls.rates)
     const data = await resp.json()
-    for (const rate of ["SGD", "JPY", "CNY", "HKD"]) {
+    for (const rate of ["USD", "JPY", "CNY", "HKD"]) {
       rates[rate] = data.conversion_rates[rate]
     }
     rates.time = data.time_last_update_unix * 1000 + eightHrMsecs // store in local time
@@ -75,7 +75,7 @@ const getFinancials = async () => {
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
   const sdrs = { HBBD: { ratio: 5, currency: "HKD" } }
   const { ratio, currency } = sdrs[symbol]
-  const v = last * ratio * rates[currency] / rates.SGD * 0.99 // apply 1% lower rate
+  const v = last * ratio * rates[currency] * 0.99 // apply 1% lower rate
   return `${currency} ${v.toFixed(2)}`
 }
 
@@ -88,7 +88,7 @@ const updateState = async () => {
   for (const symbol in stocks) {
     let avg_price, mkt_value, gain_loss = null
     if (symbol in portfolio) {
-      const rate = stocks[symbol].n.trim().endsWith("USD") ? rates.SGD : 1
+      const rate = stocks[symbol].n.trim().endsWith("USD") ? 1 / rates.USD : 1
       avg_price = portfolio[symbol].avg_price
       mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings * rate)
       gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings * rate)
@@ -108,9 +108,9 @@ const updateState = async () => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1USD = ${rates.SGD.toFixed(3)}SGD`
-  totals.stocks.meta = `1SGD = ${(rates.JPY / rates.SGD).toFixed(3)}JPY`
-  totals.monitored.meta = `10CNY = ${(rates.SGD / rates.CNY * 10).toFixed(3)}SGD`
+  totals.reits.meta = `1USD = ${(1 / rates.USD).toFixed(3)}SGD`
+  totals.stocks.meta = `1SGD = ${rates.JPY.toFixed(3)}JPY`
+  totals.monitored.meta = `10CNY = ${((1 / rates.CNY) * 10).toFixed(3)}SGD`
   return [stocks, time, totals]
 }
 
@@ -153,6 +153,7 @@ const columns = [
       }
       return `<div class="text-violet-400 text-left text-sm/4" 
       onclick="window.open('${urls.sgx.replace('{CODE}', code)}')">${name}</div>`
+      // onclick="window.open('${urls.divs.replace('{CODE}', code)}')">${name}</div>`
     }
   },
 
