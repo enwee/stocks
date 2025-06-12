@@ -19,7 +19,8 @@
     --spacing: 0.25rem;
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
-    --text-xl: 1.25rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --animate-true: true 1s ease-out;
@@ -263,6 +264,10 @@
   .align-middle {
     vertical-align: middle;
   }
+  .text-lg {
+    font-size: var(--text-lg);
+    line-height: var(--tw-leading, var(--text-lg--line-height));
+  }
   .text-sm {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
@@ -270,10 +275,6 @@
   .text-sm\/4 {
     font-size: var(--text-sm);
     line-height: calc(var(--spacing) * 4);
-  }
-  .text-xl\/6 {
-    font-size: var(--text-xl);
-    line-height: calc(var(--spacing) * 6);
   }
   .whitespace-nowrap {
     white-space: nowrap;

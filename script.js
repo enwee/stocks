@@ -194,7 +194,7 @@ const numComma = (num, colored = false) => `<div class="${color(colored ? num : 
 const header = "pb-2 px-2 text-gray-400 whitespace-nowrap"
 const border = "border border-gray-400 "
 const padding = "py-1 px-2 "
-const text = "text-xl/6 text-gray-400 text-right "
+const text = "text-lg text-gray-400 text-right "
 const base = border + padding + text
 const green = "text-emerald-500"
 const red = "text-rose-700"
