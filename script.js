@@ -151,7 +151,7 @@ const columns = [
         name = words.slice(0, 3).join(" ")
         name = name.length > 16 ? words.slice(0, 2).join(" ") : name
       }
-      return `<div class="text-violet-400 text-left text-base" 
+      return `<div class="text-violet-400 text-left text-sm" 
       onclick="window.open('${urls.sgx.replace('{CODE}', code)}')">${name}</div>`
     }
   },
