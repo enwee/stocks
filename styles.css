@@ -19,12 +19,7 @@
     --spacing: 0.25rem;
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
-    --text-base: 1rem;
-    --text-base--line-height: calc(1.5 / 1);
-    --text-lg: 1.125rem;
-    --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
-    --text-xl--line-height: calc(1.75 / 1.25);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --animate-true: true 1s ease-out;
@@ -186,26 +181,17 @@
   .inline-flex {
     display: inline-flex;
   }
-  .table {
-    display: table;
-  }
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
   .w-72 {
     width: calc(var(--spacing) * 72);
   }
-  .border-collapse {
-    border-collapse: collapse;
-  }
   .animate-\(--animate-false\) {
     animation: var(--animate-false);
   }
   .animate-\(--animate-true\) {
     animation: var(--animate-true);
-  }
-  .resize {
-    resize: both;
   }
   .items-center {
     align-items: center;
@@ -277,21 +263,13 @@
   .align-middle {
     vertical-align: middle;
   }
-  .text-base {
-    font-size: var(--text-base);
-    line-height: var(--tw-leading, var(--text-base--line-height));
-  }
-  .text-lg {
-    font-size: var(--text-lg);
-    line-height: var(--tw-leading, var(--text-lg--line-height));
-  }
   .text-sm {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
   }
-  .text-xl {
-    font-size: var(--text-xl);
-    line-height: var(--tw-leading, var(--text-xl--line-height));
+  .text-sm\/4 {
+    font-size: var(--text-sm);
+    line-height: calc(var(--spacing) * 4);
   }
   .text-xl\/6 {
     font-size: var(--text-xl);
@@ -315,13 +293,6 @@
   .text-white {
     color: var(--color-white);
   }
-  .underline {
-    text-decoration-line: underline;
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
-  }
   .hover\:bg-violet-400 {
     &:hover {
       @media (hover: hover) {
@@ -331,11 +302,6 @@
   }
 }
 @property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@property --tw-outline-style {
   syntax: "*";
   inherits: false;
   initial-value: solid;
@@ -366,7 +332,6 @@
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
       --tw-border-style: solid;
-      --tw-outline-style: solid;
     }
   }
 }
