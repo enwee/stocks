@@ -1,4 +1,3 @@
-const eightHrMsecs = 8 * 60 * 60 * 1000
 
 const get = key => JSON.parse(localStorage.getItem(key))
 
@@ -10,17 +9,24 @@ const counters = Object.values(display).flat()
 
 const portfolio = get("portfolio")
 
-const officeHours = () => {
-  const now = new Date(), day = now.getDay(), hour = now.getHours(), minute = now.getMinutes()
-  if (day < 1 || day > 5) { return false }
-  if (hour < 8 || hour > 17) { return false }
-  if (hour == 8 && minute < 30) { return false }
-  if (hour == 17 && minute > 30) { return false }
-  return true
+// time shifted back 8hrs can get Date change to happen at 8am
+const eightHrMsecs = 8 * 60 * 60 * 1000
+
+const notSameday = (t1, t2, shift = 0) => new Date(t1 - shift).toDateString() != new Date(t2 - shift).toDateString()
+
+const isWeekend = time => [0, 6].includes(new Date(time).getDay())
+
+const isAfter = (hhmm, time) => {
+  const now = new Date(time), hour = now.getHours(), minute = now.getMinutes()
+  const hh = Math.floor(hhmm / 100), mm = hhmm % 100
+  return hour > hh || (hour == hh && minute > mm)
 }
 
-const beforeToday8am = time => // time shifted back 8hrs to get 8am Date change
-  new Date(time - eightHrMsecs).toDateString() != new Date(Date.now() - eightHrMsecs).toDateString()
+const updateDue = (processedTime, intervalTime) => notSameday(processedTime, intervalTime) ? true :
+  isWeekend(intervalTime) ? false :
+    isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
+      isAfter(830, intervalTime) && (intervalTime - processedTime > 80000)
+
 
 const getQuotes = async () => {
   console.log('getting quotes...')
@@ -35,9 +41,9 @@ const getQuotes = async () => {
   return [quotes, data.meta.processedTime]
 }
 
-const getRates = async () => {
+const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
-  if (!rates || beforeToday8am(rates.time)) {
+  if (!rates || notSameday(rates.time, referenceTime, eightHrMsecs)) {
     console.log(`getting rates...`)
     rates = {}
     const resp = await fetch(urls.rates)
@@ -52,9 +58,9 @@ const getRates = async () => {
   return rates
 }
 
-const getFinancials = async () => {
+const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
-  if (!financials || beforeToday8am(financials.time)) {
+  if (!financials || notSameday(financials.time, referenceTime, eightHrMsecs)) {
     financials = {}
     for (const symbol of counters) {
       console.log(`getting financials ${symbol}...`)
@@ -79,9 +85,9 @@ const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
   return `${currency} ${v.toFixed(2)}`
 }
 
-const updateState = async () => {
-  const rates = await getRates()
-  const financials = await getFinancials()
+const updateStocks = async (referenceTime = Date.now()) => {
+  const rates = await getRates(referenceTime)
+  const financials = await getFinancials(referenceTime)
   const [stocks, time] = await getQuotes()
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
@@ -108,10 +114,10 @@ const updateState = async () => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1USD = ${(1 / rates.USD).toFixed(3)}SGD`
-  totals.stocks.meta = `1SGD = ${rates.JPY.toFixed(3)}JPY`
-  totals.monitored.meta = `10CNY = ${((1 / rates.CNY) * 10).toFixed(3)}SGD`
-  return [stocks, time, totals]
+  totals.reits.meta = `1 USD = ${(1 / rates.USD).toFixed(3)} SGD`
+  totals.stocks.meta = `1 SGD = ${rates.JPY.toFixed(3)} JPY`
+  totals.monitored.meta = `10 CNY = ${((1 / rates.CNY) * 10).toFixed(3)} SGD`
+  return [stocks, referenceTime, totals]
 }
 
 const data = () => {
@@ -123,8 +129,8 @@ const data = () => {
     intervalId: 0,
     async updateSelf(initial = false) {
       this.intervalTime = Date.now()
-      if (initial || (officeHours() && this.intervalTime - this.processedTime > 80000)) {
-        [stocks, time, totals] = await updateState()
+      if (initial || updateDue(this.processedTime, this.intervalTime)) {
+        [stocks, time, totals] = await updateStocks(this.intervalTime)
         this.stocks = stocks
         this.totals = totals
         this.processedTime = time
@@ -139,6 +145,7 @@ const data = () => {
     init() {
       this.updateSelf(true)
       this.intervalId = setInterval(async () => await this.updateSelf(), 1000);
+      // do something to make interval cater for awaits
     }
   }
 }
@@ -153,7 +160,7 @@ const columns = [
       }
       return `<div class="text-violet-400 text-left text-sm/4" 
       onclick="window.open('${urls.sgx.replace('{CODE}', code)}')">${name}</div>`
-      // onclick="window.open('${urls.divs.replace('{CODE}', code)}')">${name}</div>`
+      // onclick buttons bar, sgx,hkex page for sdrInfo, divs.sg, own calculated div page
     }
   },
 
@@ -171,13 +178,15 @@ const columns = [
         return `(${sdrInfo})`
       }
       const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 50
-      return `<div class="pr-2 w-16">${fiftyTwoWeekHigh}</div>
+      return `<div class="w-12">${fiftyTwoWeekHigh}</div>
+      <div class="p-2">
       <svg class="bg-violet-900" width="50" height="10" xmlns="http://www.w3.org/2000/svg">
-        <rect class="fill-current text-violet-400" height="10" 
-          width="${(high - low) / pixel}" x="${(fiftyTwoWeekHigh - high) / pixel}" />
-        <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
+      <rect class="fill-current text-violet-400" height="10" 
+      width="${(high - low) / pixel}" x="${(fiftyTwoWeekHigh - high) / pixel}" />
+      <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
       </svg>
-      <div class="text-left pl-2 w-16">${fiftyTwoWeekLow}</div>`
+      </div>
+      <div class="text-left w-12">${fiftyTwoWeekLow}</div>`
     }
   },
 

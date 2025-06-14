@@ -56,8 +56,8 @@
               </tr>
             </template>
             <tr>
-              <td class="text-sm" x-text="totals[stockType].meta"></td>
-              <td :colspan="columns.length - 4"></td>
+              <td :class="padding + 'text-sm'" colspan="2" x-text="totals[stockType].meta"></td>
+              <td :colspan="columns.length - 5"></td>
               <td :class="padding + 'text-right'">Total:</td>
               <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
               <td :class="padding + text" x-html="numComma(totals[stockType].gain_loss, true)"></td>
