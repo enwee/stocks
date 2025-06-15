@@ -1,6 +1,6 @@
-*
-!favicon.ico
-!styles.css
-!script.js
-!index.html
-!init.html
+/scribble
+/json
+/pages
+/node_modules
+package-lock.json
+package.json
