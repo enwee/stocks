@@ -35,6 +35,7 @@ const getQuotes = async () => {
   return [quotes, data.meta.processedTime]
 }
 
+// referenceTime = Date.now() default is needed for when directly calling this from console
 const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
   if (!rates || notSameday(rates.time, referenceTime, EIGHTHRSMILLISECS)) {
@@ -45,13 +46,15 @@ const getRates = async (referenceTime = Date.now()) => {
     for (const rate of ["USD", "JPY", "CNY", "HKD"]) {
       rates[rate] = data.conversion_rates[rate]
     }
-    rates.time = data.time_last_update_unix * 1000 + EIGHTHRSMILLISECS // store in local time
+    rates.time = data.time_last_update_unix * 1000 // store in local time
+    rates.time1 = new Date(rates.time).toString()
     localStorage.setItem("rates", JSON.stringify(rates))
     console.log(`rates done (${Date(rates.time)})`)
   }
   return rates
 }
 
+// referenceTime = Date.now() default is needed for when directly calling this from console
 const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
   if (!financials || notSameday(financials.time, referenceTime, EIGHTHRSMILLISECS)) {
@@ -66,6 +69,7 @@ const getFinancials = async (referenceTime = Date.now()) => {
       financials[symbol] = data
     }
     financials.time = Date.now()
+    financials.time1 = new Date(financials.time).toString()
     localStorage.setItem("financials", JSON.stringify(financials))
     console.log(`financials done (${Date(financials.time)})`)
   }
@@ -119,13 +123,14 @@ const data = () => {
   return {
     stocks: {},
     totals: {},
+    initialTime: Date.now(),
     processedTime: 0,
     intervalTime: 0,
     intervalId: 0,
     async updateSelf(initial = false) {
-      this.intervalTime = Date.now()
       if (initial || updateDue(this.processedTime, this.intervalTime)) {
-        const [stocks, time, totals] = await updateStocks(this.intervalTime)
+        // do not updateStocks(intervalTime) cos intervalTime == 0 for initial
+        const [stocks, time, totals] = await updateStocks()
         this.stocks = stocks
         this.totals = totals
         this.processedTime = time
@@ -137,10 +142,19 @@ const data = () => {
       //   this.stocks[symbol].gain_loss++
       // }
     },
-    init() {
-      this.updateSelf(true)
-      this.intervalId = setInterval(async () => await this.updateSelf(), 1000);
-      // do something to make interval cater for awaits
+    async init() {
+      await this.updateSelf(true)
+      this.intervalId = setInterval(
+        async () => {
+          if (notSameday(this.initialTime, this.intervalTime)) {
+            location.reload()
+          }
+          this.intervalTime = Date.now()
+          if (this.intervalTime - this.processedTime > 10000) {
+            await this.updateSelf()
+          }
+        }, 1000);
+      // do only every 10s to cater for awaits
     }
   }
 }
@@ -207,5 +221,20 @@ const base = border + padding + text
 const green = "text-emerald-500"
 const red = "text-rose-700"
 const color = num => num > 0 ? green : num < 0 ? red : ""
-const button = "bg-violet-900 hover:bg-violet-400 px-4 rounded-full"
+const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
 const blink = bool => bool ? "animate-(--animate-true)" : "animate-(--animate-false)"
+
+const hhmmss = millisecs => {
+  let hrs = 0
+  let mins = 0
+  let secs = Math.floor(millisecs / 1000)
+  if (secs > 59) {
+    mins = Math.floor(secs / 60)
+    secs = secs % 60
+  }
+  if (mins > 60) {
+    hrs = Math.floor(mins / 60)
+    mins = mins % 60
+  }
+  return `${hrs ? `${hrs} hrs ` : ""}${mins ? `${mins} mins ` : ""}${secs} secs`
+}

@@ -66,17 +66,16 @@
         </template>
       </table>
 
-      <div class="py-2 w-72 inline-flex justify-between text-sm">
-        <div>
-          <span x-text="new Date(processedTime).toLocaleTimeString()"></span>
-          <span x-text="new Date(processedTime).toDateString()"></span>
-          <div>
-            <span>last updated</span>
-            <span x-text="Math.floor((intervalTime-processedTime)/1000)"></span>
-            <span>secs ago</span>
+      <div class="w-96 flex justify-between items-center text-sm">
+        <div class="flex flex-col justify-around">
+          <div x-text="`${new Date(processedTime).toLocaleTimeString()} ${new Date(processedTime).toDateString()}`">
           </div>
+          <div x-text="`${hhmmss(intervalTime-processedTime)} ago`"></div>
         </div>
-        <button :class="button" @click="clearInterval(intervalId)">STOP</button>
+        <div class="space-x-4">
+          <button :class="button" @click="clearInterval(intervalId)">STOP</button>
+          <button :class="button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
+        </div>
       </div>
     </div>
   </template>

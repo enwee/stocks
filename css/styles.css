@@ -21,6 +21,7 @@
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
+    --radius-2xl: 1rem;
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --animate-true: true 1s ease-out;
@@ -179,17 +180,14 @@
   .flex {
     display: flex;
   }
-  .inline-flex {
-    display: inline-flex;
-  }
   .table {
     display: table;
   }
   .w-12 {
     width: calc(var(--spacing) * 12);
   }
-  .w-72 {
-    width: calc(var(--spacing) * 72);
+  .w-96 {
+    width: calc(var(--spacing) * 96);
   }
   .animate-\(--animate-false\) {
     animation: var(--animate-false);
@@ -197,8 +195,14 @@
   .animate-\(--animate-true\) {
     animation: var(--animate-true);
   }
+  .flex-col {
+    flex-direction: column;
+  }
   .items-center {
     align-items: center;
+  }
+  .justify-around {
+    justify-content: space-around;
   }
   .justify-between {
     justify-content: space-between;
@@ -206,8 +210,15 @@
   .justify-center {
     justify-content: center;
   }
-  .rounded-full {
-    border-radius: calc(infinity * 1px);
+  .space-x-4 {
+    :where(& > :not(:last-child)) {
+      --tw-space-x-reverse: 0;
+      margin-inline-start: calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));
+      margin-inline-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)));
+    }
+  }
+  .rounded-2xl {
+    border-radius: var(--radius-2xl);
   }
   .border {
     border-style: var(--tw-border-style);
@@ -296,6 +307,11 @@
     }
   }
 }
+@property --tw-space-x-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -320,6 +336,7 @@
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
+      --tw-space-x-reverse: 0;
       --tw-border-style: solid;
     }
   }
