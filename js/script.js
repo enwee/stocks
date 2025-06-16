@@ -213,8 +213,8 @@ const columns = [
 const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
 // css classes
-const header = "pb-2 px-2 text-gray-400 whitespace-nowrap"
-const border = "border border-gray-400 "
+const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
+const border = "border-b border-r border-gray-400 "
 const padding = "py-1 px-2 "
 const text = "text-lg text-gray-400 text-right "
 const base = border + padding + text
@@ -222,7 +222,7 @@ const green = "text-emerald-500"
 const red = "text-rose-700"
 const color = num => num > 0 ? green : num < 0 ? red : ""
 const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
-const blink = bool => bool ? "animate-(--animate-true)" : "animate-(--animate-false)"
+const blink = bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
 
 const hhmmss = millisecs => {
   let hrs = 0

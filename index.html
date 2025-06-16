@@ -15,8 +15,8 @@
   <template x-data="data" x-if="JSON.stringify(stocks) !== '{}'">
     <div class="p-2">
 
-      <table>
-        <thead>
+      <table class="border-separate border-spacing-0">
+        <thead class="sticky top-2 z-10 bg-black shadow-[0_-0.5rem] shadow-black">
           <tr>
             <template x-for="{label} in columns">
               <th :class="header" x-text="label"></th>
@@ -30,24 +30,25 @@
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type=='name'">
-                      <td :class="base">
+                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
+                        `${index?'':'border-t '}`+`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
                         <div x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                     <template x-if="type=='52w'">
-                      <td :class="base">
+                      <td :class="base+`${index?'':'border-t'}`">
                         <div class="flex items-center justify-center" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                     <template x-if="type=='default'">
-                      <td :class="base">
+                      <td :class="base+`${index?'':'border-t'}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
                       </td>
                     </template>
                     <template x-if="type=='watched'">
                       <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]', 
                         (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
-                        :class="`${base}${blink(toggle)}`">
+                        :class="`${base}${blink(toggle)}${index?'':'border-t'}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
                       </td>
                     </template>
@@ -56,7 +57,7 @@
               </tr>
             </template>
             <tr>
-              <td :class="padding + 'text-sm'" colspan="2" x-text="totals[stockType].meta"></td>
+              <td :class="padding + 'text-sm sticky left-2'" colspan="2" x-text="totals[stockType].meta"></td>
               <td :colspan="columns.length - 5"></td>
               <td :class="padding + 'text-right'">Total:</td>
               <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
@@ -66,7 +67,7 @@
         </template>
       </table>
 
-      <div class="w-96 flex justify-between items-center text-sm">
+      <div class="w-96 flex justify-between items-center text-sm sticky left-2">
         <div class="flex flex-col justify-around">
           <div x-text="`${new Date(processedTime).toLocaleTimeString()} ${new Date(processedTime).toDateString()}`">
           </div>
