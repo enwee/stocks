@@ -1,27 +1,21 @@
-
+// from localStorage
 const get = key => JSON.parse(localStorage.getItem(key))
-
 const urls = get("urls")
-const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
-
 const display = get("display")
 const counters = Object.values(display).flat()
-
 const portfolio = get("portfolio")
+const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
-// time shifted back 8hrs can get Date change to happen at 8am
-const eightHrMsecs = 8 * 60 * 60 * 1000
-
+// datetime related
+const EIGHTHRSMILLISECS = 8 * 60 * 60 * 1000
+// time shifted back 8hrs to get Date change happening at 8am
 const notSameday = (t1, t2, shift = 0) => new Date(t1 - shift).toDateString() != new Date(t2 - shift).toDateString()
-
 const isWeekend = time => [0, 6].includes(new Date(time).getDay())
-
 const isAfter = (hhmm, time) => {
   const now = new Date(time), hour = now.getHours(), minute = now.getMinutes()
   const hh = Math.floor(hhmm / 100), mm = hhmm % 100
   return hour > hh || (hour == hh && minute > mm)
 }
-
 const updateDue = (processedTime, intervalTime) => notSameday(processedTime, intervalTime) ? true :
   isWeekend(intervalTime) ? false :
     isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
@@ -43,7 +37,7 @@ const getQuotes = async () => {
 
 const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
-  if (!rates || notSameday(rates.time, referenceTime, eightHrMsecs)) {
+  if (!rates || notSameday(rates.time, referenceTime, EIGHTHRSMILLISECS)) {
     console.log(`getting rates...`)
     rates = {}
     const resp = await fetch(urls.rates)
@@ -51,7 +45,7 @@ const getRates = async (referenceTime = Date.now()) => {
     for (const rate of ["USD", "JPY", "CNY", "HKD"]) {
       rates[rate] = data.conversion_rates[rate]
     }
-    rates.time = data.time_last_update_unix * 1000 + eightHrMsecs // store in local time
+    rates.time = data.time_last_update_unix * 1000 + EIGHTHRSMILLISECS // store in local time
     localStorage.setItem("rates", JSON.stringify(rates))
     console.log(`rates done (${Date(rates.time)})`)
   }
@@ -60,13 +54,13 @@ const getRates = async (referenceTime = Date.now()) => {
 
 const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
-  if (!financials || notSameday(financials.time, referenceTime, eightHrMsecs)) {
+  if (!financials || notSameday(financials.time, referenceTime, EIGHTHRSMILLISECS)) {
     financials = {}
     for (const symbol of counters) {
       console.log(`getting financials ${symbol}...`)
       const resp = await fetch(useProxy(urls.financials.replace("{CODE}", symbol)))
       const data = (await resp.json()).data[0] || {}
-      for (key in data) {
+      for (const key in data) {
         data[key] = data[key] ? Number(data[key]) : data[key]
       }
       financials[symbol] = data
@@ -88,7 +82,7 @@ const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
 const updateStocks = async (referenceTime = Date.now()) => {
   const rates = await getRates(referenceTime)
   const financials = await getFinancials(referenceTime)
-  const [stocks, time] = await getQuotes()
+  const [stocks, processedTime] = await getQuotes()
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
@@ -117,9 +111,10 @@ const updateStocks = async (referenceTime = Date.now()) => {
   totals.reits.meta = `1 USD = ${(1 / rates.USD).toFixed(3)} SGD`
   totals.stocks.meta = `1 SGD = ${rates.JPY.toFixed(3)} JPY`
   totals.monitored.meta = `10 CNY = ${((1 / rates.CNY) * 10).toFixed(3)} SGD`
-  return [stocks, referenceTime, totals]
+  return [stocks, processedTime, totals]
 }
 
+// alpinejs x-data
 const data = () => {
   return {
     stocks: {},
@@ -130,7 +125,7 @@ const data = () => {
     async updateSelf(initial = false) {
       this.intervalTime = Date.now()
       if (initial || updateDue(this.processedTime, this.intervalTime)) {
-        [stocks, time, totals] = await updateStocks(this.intervalTime)
+        const [stocks, time, totals] = await updateStocks(this.intervalTime)
         this.stocks = stocks
         this.totals = totals
         this.processedTime = time
@@ -150,6 +145,9 @@ const data = () => {
   }
 }
 
+
+
+// html page table columns
 const columns = [
   {
     label: "Company Name", alias: "n", type: "name", format: ({ n: name, nc: code }) => {

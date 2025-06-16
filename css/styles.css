@@ -182,6 +182,9 @@
   .inline-flex {
     display: inline-flex;
   }
+  .table {
+    display: table;
+  }
   .w-12 {
     width: calc(var(--spacing) * 12);
   }
