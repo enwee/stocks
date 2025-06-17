@@ -30,11 +30,10 @@
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type=='name'">
-                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
+                      <td :class="padding+border+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
                         `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
-                        <div @click.prevent="show=true"
-                          class="text-violet-400 text-left text-sm/3.5 h-7 hover:cursor-pointer"
-                          x-text="format(stocks[symbol][alias])"></div>
+                        <div class="h-7 flex items-center text-sm/3.5 text-violet-400 hover:cursor-pointer"
+                          @click.prevent="show=true" x-text="format(stocks[symbol][alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
                           class="absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
                           <template x-if="stocks[symbol].sdrInfo">
