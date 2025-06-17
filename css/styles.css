@@ -174,14 +174,23 @@
   }
 }
 @layer utilities {
+  .absolute {
+    position: absolute;
+  }
   .sticky {
     position: sticky;
+  }
+  .-top-1 {
+    top: calc(var(--spacing) * -1);
   }
   .top-2 {
     top: calc(var(--spacing) * 2);
   }
   .left-2 {
     left: calc(var(--spacing) * 2);
+  }
+  .left-34 {
+    left: calc(var(--spacing) * 34);
   }
   .z-10 {
     z-index: 10;
@@ -195,11 +204,21 @@
   .table {
     display: table;
   }
+  .size-7 {
+    width: calc(var(--spacing) * 7);
+    height: calc(var(--spacing) * 7);
+  }
+  .h-max {
+    height: max-content;
+  }
   .w-12 {
     width: calc(var(--spacing) * 12);
   }
   .w-96 {
     width: calc(var(--spacing) * 96);
+  }
+  .w-max {
+    width: max-content;
   }
   .border-separate {
     border-collapse: separate;
@@ -230,12 +249,22 @@
   .justify-center {
     justify-content: center;
   }
+  .space-x-2 {
+    :where(& > :not(:last-child)) {
+      --tw-space-x-reverse: 0;
+      margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
+      margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
+    }
+  }
   .space-x-4 {
     :where(& > :not(:last-child)) {
       --tw-space-x-reverse: 0;
       margin-inline-start: calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));
       margin-inline-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)));
     }
+  }
+  .rounded {
+    border-radius: 0.25rem;
   }
   .rounded-2xl {
     border-radius: var(--radius-2xl);
@@ -271,6 +300,9 @@
   }
   .bg-stone-900 {
     background-color: var(--color-stone-900);
+  }
+  .bg-violet-400 {
+    background-color: var(--color-violet-400);
   }
   .bg-violet-900 {
     background-color: var(--color-violet-900);
@@ -313,9 +345,9 @@
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
   }
-  .text-sm\/4 {
+  .text-sm\/3\.5 {
     font-size: var(--text-sm);
-    line-height: calc(var(--spacing) * 4);
+    line-height: calc(var(--spacing) * 3.5);
   }
   .whitespace-nowrap {
     white-space: nowrap;
@@ -347,6 +379,13 @@
     --tw-shadow-color: #000;
     @supports (color: color-mix(in lab, red, red)) {
       --tw-shadow-color: color-mix(in oklab, var(--color-black) var(--tw-shadow-alpha), transparent);
+    }
+  }
+  .hover\:cursor-pointer {
+    &:hover {
+      @media (hover: hover) {
+        cursor: pointer;
+      }
     }
   }
   .hover\:bg-violet-400 {

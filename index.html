@@ -26,13 +26,24 @@
         <template x-for="stockType in Object.keys(display)">
           <tbody>
             <template x-for="(symbol, index) in display[stockType]">
-              <tr :class="`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
+              <tr :class="altBG(index % 2)">
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type=='name'">
-                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
-                        `${index?'':'border-t '}`+`${index % 2 ? 'bg-slate-900' :'bg-stone-900'}`">
-                        <div x-html="format(stocks[symbol])"></div>
+                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 hover:cursor-pointer '+
+                        `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}" @click.prevent="show=true">
+                        <div class="text-violet-400 text-left text-sm/3.5" x-text="format(stocks[symbol][alias])"></div>
+                        <div x-show="show" @click.outside="show=false" x-transition
+                          class="absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
+                          <template x-if="stocks[symbol].sdrInfo">
+                            <img src="images/hkex.png" class="size-7"
+                              @click="window.open(urls.hkex.replace('{CODE}', stocks[symbol].sdrInfo.code));show=false">
+                          </template>
+                          <template x-for="{name, icon, ext} in links">
+                            <img :src="`images/${icon}`" class="size-7"
+                              @click="window.open(ext?urls[name].replace('{CODE}', symbol):location.origin+`/stocks/${name}.html?${symbol}`);show=false">
+                          </template>
+                        </div>
                       </td>
                     </template>
                     <template x-if="type=='52w'">
@@ -78,6 +89,7 @@
           <button :class="button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
         </div>
       </div>
+
     </div>
   </template>
 </body>

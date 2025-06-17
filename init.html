@@ -29,22 +29,25 @@
 <body>
   <div x-data="{key:'',value:''}">
     <div :style="style">
-      <button @click="localStorage.clear()">clear data</button>
+      <button @click="location.href=location.origin+'/stocks/js/script.js'">script</button>
+      <button @click="location.href=location.origin+'/stocks/css/styles.css'">styles</button>
+      <button @click="location.href=location.origin+'/stocks/index.html'">index</button>
+    </div>
+    <div :style="style">
       <button @click="getFile">from file</button>
+      <button @click="localStorage.clear()">clear data ⚠️⛔</button>
     </div>
     <div :style="style">
-      <button @click="location.href=location.origin+'/stocks/js/script.js'">script.js</button>
-      <button @click="location.href=location.origin+'/stocks/css/styles.css'">styles.css</button>
+      <div>
+        <input style="width:48px" x-model="key" placeholder="key">
+        <input style="width:128px" x-model="value" placeholder="value">
+      </div>
+      <div style="padding-top: 4px">
+        <button @click="localStorage.setItem(key.trim(), value); key=''; value=''">save</button>
+        <button @click="localStorage.removeItem(key.trim()); key=''; value=''">remove ⚠️⛔</button>
+      </div>
     </div>
-    <div :style="style">
-      <input :style="'width:48px'" x-model="key" placeholder="key">
-      <input :style="'width:128px'" x-model="value" placeholder="value">
-    </div>
-    <div>
-      <button @click="localStorage.setItem(key.trim(), value); key=''; value=''">save</button>
-      <button @click="localStorage.removeItem(key.trim()); key=''; value=''">remove</button>
-      <pre x-text="JSON.stringify(JSON.parse(localStorage.getItem(key)),null,2)"></pre>
-    </div>
+    <pre x-text="JSON.stringify(JSON.parse(localStorage.getItem(key)),null,2)"></pre>
   </div>
 </body>
 

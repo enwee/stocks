@@ -77,13 +77,13 @@ const getFinancials = async (referenceTime = Date.now()) => {
 }
 
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
-  const sdrs = { HBBD: { ratio: 5, currency: "HKD" } }
-  const { ratio, currency } = sdrs[symbol]
+  const sdrs = { HBBD: { ratio: 5, currency: "HKD", code: "9988" } }
+  const { ratio, currency, code } = sdrs[symbol]
   const v = last * ratio * rates[currency] * 0.99 // apply 1% lower rate
-  return `${currency} ${v.toFixed(2)}`
+  return { price: `${currency} ${v.toFixed(2)}`, code }
 }
 
-const updateStocks = async (referenceTime = Date.now()) => {
+const updateDisplay = async (referenceTime = Date.now()) => {
   const rates = await getRates(referenceTime)
   const financials = await getFinancials(referenceTime)
   const [stocks, processedTime] = await getQuotes()
@@ -130,7 +130,7 @@ const data = () => {
     async updateSelf(initial = false) {
       if (initial || updateDue(this.processedTime, this.intervalTime)) {
         // do not updateStocks(intervalTime) cos intervalTime == 0 for initial
-        const [stocks, time, totals] = await updateStocks()
+        const [stocks, time, totals] = await updateDisplay()
         this.stocks = stocks
         this.totals = totals
         this.processedTime = time
@@ -151,10 +151,10 @@ const data = () => {
           }
           this.intervalTime = Date.now()
           if (this.intervalTime - this.processedTime > 10000) {
+            // do only every 10s to cater for on going awaits
             await this.updateSelf()
           }
         }, 1000);
-      // do only every 10s to cater for awaits
     }
   }
 }
@@ -164,15 +164,13 @@ const data = () => {
 // html page table columns
 const columns = [
   {
-    label: "Company Name", alias: "n", type: "name", format: ({ n: name, nc: code }) => {
+    label: "Company Name", alias: "n", type: "name", format: name => {
       const words = name.split(" ")
       if (words.length > 2) {
         name = words.slice(0, 3).join(" ")
         name = name.length > 16 ? words.slice(0, 2).join(" ") : name
       }
-      return `<div class="text-violet-400 text-left text-sm/4" 
-      onclick="window.open('${urls.sgx.replace('{CODE}', code)}')">${name}</div>`
-      // onclick buttons bar, sgx,hkex page for sdrInfo, divs.sg, own calculated div page
+      return name
     }
   },
 
@@ -187,7 +185,7 @@ const columns = [
     label: "52 week H/L", alias: "-", type: "52w",
     format: ({ fiftyTwoWeekHigh, fiftyTwoWeekLow, lt: last, h: high, l: low, type, sdrInfo }) => {
       if (type == "adrs") {
-        return `(${sdrInfo})`
+        return `(${sdrInfo.price})`
       }
       const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 50
       return `<div class="w-12">${fiftyTwoWeekHigh}</div>
@@ -210,19 +208,15 @@ const columns = [
   { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: num => num !== null ? numComma(num, true) : "-" },
 ]
 
-const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
+const links = [
+  { name: "sgx", icon: "sgx.ico", ext: true },
+  { name: "yahoo", icon: "yahoo.png", ext: true },
+  { name: "google", icon: "google.png", ext: true },
+  { name: "divsg", icon: "divsg.png", ext: true },
+  { name: "counter", icon: "money.png", ext: false },
+]
 
-// css classes
-const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
-const border = "border-b border-r border-gray-400 "
-const padding = "py-1 px-2 "
-const text = "text-lg text-gray-400 text-right "
-const base = border + padding + text
-const green = "text-emerald-500"
-const red = "text-rose-700"
-const color = num => num > 0 ? green : num < 0 ? red : ""
-const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
-const blink = bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
+const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
 const hhmmss = millisecs => {
   let hrs = 0
@@ -238,3 +232,16 @@ const hhmmss = millisecs => {
   }
   return `${hrs ? `${hrs} hrs ` : ""}${mins ? `${mins} mins ` : ""}${secs} secs`
 }
+
+// css classes
+const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
+const border = "border-b border-r border-gray-400 "
+const padding = "py-1 px-2 "
+const text = "text-lg text-gray-400 text-right "
+const base = border + padding + text
+const green = "text-emerald-500"
+const red = "text-rose-700"
+const color = num => num > 0 ? green : num < 0 ? red : ""
+const altBG = bool => bool ? "bg-slate-900" : "bg-stone-900"
+const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
+const blink = bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
