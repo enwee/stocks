@@ -30,18 +30,20 @@
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type=='name'">
-                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 hover:cursor-pointer '+
-                        `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}" @click.prevent="show=true">
-                        <div class="text-violet-400 text-left text-sm/3.5" x-text="format(stocks[symbol][alias])"></div>
+                      <td :class="base+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
+                        `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
+                        <div @click.prevent="show=true"
+                          class="text-violet-400 text-left text-sm/3.5 h-7 hover:cursor-pointer"
+                          x-text="format(stocks[symbol][alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
                           class="absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
                           <template x-if="stocks[symbol].sdrInfo">
                             <img src="images/hkex.png" class="size-7"
-                              @click="window.open(urls.hkex.replace('{CODE}', stocks[symbol].sdrInfo.code));show=false">
+                              @click="window.open(urls.hkex.replace('{CODE}',stocks[symbol].sdrInfo.code));show=false">
                           </template>
                           <template x-for="{name, icon, ext} in links">
                             <img :src="`images/${icon}`" class="size-7"
-                              @click="window.open(ext?urls[name].replace('{CODE}', symbol):location.origin+`/stocks/${name}.html?${symbol}`);show=false">
+                              @click="window.open(ext?urls[name].replace('{CODE}',symbol):location.origin+`/stocks/${name}.html?${symbol}`);show=false">
                           </template>
                         </div>
                       </td>

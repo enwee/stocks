@@ -208,6 +208,9 @@
     width: calc(var(--spacing) * 7);
     height: calc(var(--spacing) * 7);
   }
+  .h-7 {
+    height: calc(var(--spacing) * 7);
+  }
   .h-max {
     height: max-content;
   }
