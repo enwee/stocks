@@ -13,7 +13,7 @@
 
 <body class="bg-black text-white">
   <template x-data="data" x-if="JSON.stringify(stocks) !== '{}'">
-    <div class="p-2">
+    <div class="p-2 space-y-4">
 
       <table class="border-separate border-spacing-0">
         <thead class="sticky top-2 z-10 bg-black shadow-[0_-0.5rem] shadow-black">
@@ -79,15 +79,18 @@
         </template>
       </table>
 
-      <div class="w-96 flex justify-between items-center text-sm sticky left-2">
+      <div class="w-max space-x-4 flex justify-between items-center text-sm sticky left-2">
         <div class="flex flex-col justify-around">
-          <div x-text="`${new Date(processedTime).toLocaleTimeString()} ${new Date(processedTime).toDateString()}`">
-          </div>
-          <div x-text="`${hhmmss(intervalTime-processedTime)} ago`"></div>
+          <div x-text="`prices (${timeDateStr(time.quotes)})`"></div>
+          <div x-text="`updated ${hhmmss(time.interval-time.quotes)} ago`"></div>
         </div>
-        <div class="space-x-4">
+        <div class="space-x-2">
           <button :class="button" @click="clearInterval(intervalId)">STOP</button>
           <button :class="button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
+        </div>
+        <div class="flex flex-col justify-around text-right">
+          <div x-text="`financials (${timeDateStr(time.financials)})`"></div>
+          <div x-text="`forex (${timeDateStr(time.rates)})`"></div>
         </div>
       </div>
 

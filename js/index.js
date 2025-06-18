@@ -86,7 +86,7 @@ const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
 const updateDisplay = async (referenceTime = Date.now()) => {
   const rates = await getRates(referenceTime)
   const financials = await getFinancials(referenceTime)
-  const [stocks, processedTime] = await getQuotes()
+  const [stocks, quotesTime] = await getQuotes()
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
@@ -115,7 +115,7 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   totals.reits.meta = `1 USD = ${(1 / rates.USD).toFixed(3)} SGD`
   totals.stocks.meta = `1 SGD = ${rates.JPY.toFixed(3)} JPY`
   totals.monitored.meta = `10 CNY = ${((1 / rates.CNY) * 10).toFixed(3)} SGD`
-  return [stocks, processedTime, totals]
+  return [stocks, rates.time, financials.time, quotesTime, totals]
 }
 
 // alpinejs x-data
@@ -123,18 +123,24 @@ const data = () => {
   return {
     stocks: {},
     totals: {},
-    initialTime: Date.now(),
-    processedTime: 0,
-    intervalTime: 0,
+    time: {
+      initial: Date.now(),
+      rates: 0,
+      financials: 0,
+      quotes: 0,
+      interval: 0,
+    },
     intervalId: 0,
     async updateSelf(initial = false) {
-      if (initial || updateDue(this.processedTime, this.intervalTime)) {
+      if (initial || updateDue(this.time.quotes, this.time.interval)) {
         // do not updateStocks(intervalTime) cos intervalTime == 0 for initial
-        const [stocks, time, totals] = await updateDisplay()
+        const [stocks, ratesTime, financialsTime, quotesTime, totals] = await updateDisplay()
         this.stocks = stocks
         this.totals = totals
-        this.processedTime = time
-        this.intervalTime = Date.now() // so that no -1 and 0 secs ago
+        this.time.rates = ratesTime
+        this.time.financials = financialsTime
+        this.time.quotes = quotesTime
+        this.time.interval = Date.now() // so that no -1 and 0 secs ago
       }
       // to simulate change in data on every interval update
       // for (symbol of Object.keys(portfolio).filter(() => Math.random() < 0.5)) {
@@ -146,11 +152,11 @@ const data = () => {
       await this.updateSelf(true)
       this.intervalId = setInterval(
         async () => {
-          if (notSameday(this.initialTime, this.intervalTime)) {
+          if (notSameday(this.time.initial, this.time.interval)) {
             location.reload()
           }
-          this.intervalTime = Date.now()
-          if (this.intervalTime - this.processedTime > 10000) {
+          this.time.interval = Date.now()
+          if (this.time.interval - this.time.quotes > 10000) {
             // do only every 10s to cater for on going awaits
             await this.updateSelf()
           }
@@ -218,20 +224,22 @@ const links = [
 
 const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
-const hhmmss = millisecs => {
-  let hrs = 0
-  let mins = 0
-  let secs = Math.floor(millisecs / 1000)
-  if (secs > 59) {
-    mins = Math.floor(secs / 60)
-    secs = secs % 60
+const hhmmss = millisec => {
+  let hr = 0
+  let min = 0
+  let sec = Math.floor(millisec / 1000)
+  if (sec > 59) {
+    min = Math.floor(sec / 60)
+    sec = sec % 60
   }
-  if (mins > 59) {
-    hrs = Math.floor(mins / 60)
-    mins = mins % 60
+  if (min > 59) {
+    hr = Math.floor(min / 60)
+    min = min % 60
   }
-  return `${hrs ? `${hrs} hrs ` : ""}${mins ? `${mins} mins ` : ""}${secs} secs`
+  return `${hr ? `${hr} hr ` : ""}${min ? `${min} min ` : ""}${sec} sec`
 }
+
+const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date(time).toDateString()
 
 // css classes
 const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
