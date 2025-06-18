@@ -226,7 +226,7 @@ const hhmmss = millisecs => {
     mins = Math.floor(secs / 60)
     secs = secs % 60
   }
-  if (mins > 60) {
+  if (mins > 59) {
     hrs = Math.floor(mins / 60)
     mins = mins % 60
   }
