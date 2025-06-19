@@ -9,7 +9,7 @@ const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 // datetime related
 const EIGHTHRSMILLISECS = 8 * 60 * 60 * 1000
 // time shifted back 8hrs to get Date change happening at 8am
-const notSameday = (t1, t2, shift = 0) => new Date(t1 - shift).toDateString() !== new Date(t2 - shift).toDateString()
+const notSameday = (t1, t2, shiftBack = 0) => new Date(t1 - shiftBack).toDateString() !== new Date(t2 - shiftBack).toDateString()
 const isWeekend = time => [0, 6].includes(new Date(time).getDay())
 const isAfter = (hhmm, time) => {
   const now = new Date(time), hour = now.getHours(), minute = now.getMinutes()
@@ -38,16 +38,17 @@ const getQuotes = async () => {
 // referenceTime = Date.now() default is needed for when directly calling this from console
 const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
-  if (!rates || notSameday(rates.time, referenceTime, EIGHTHRSMILLISECS)) {
+  if (!rates || referenceTime > rates.nextUpdateTime) {
     console.log(`getting rates...`)
-    rates = { time: 0, lastUpdatedTime: "" }
+    rates = { time: 0, lastUpdateTime: "", nextUpdateTime: 0 }
     const resp = await fetch(urls.rates)
     const data = await resp.json()
     for (const rate of ["USD", "JPY", "CNY", "HKD"]) {
       rates[rate] = data.conversion_rates[rate]
     }
     rates.time = Date.now()
-    rates.lastUpdatedTime = Date(data.time_last_update_unix * 1000)
+    rates.lastUpdateTime = new Date(data.time_last_update_unix * 1000).toString()
+    rates.nextUpdateTime = data.time_next_update_unix * 1000
     localStorage.setItem("rates", JSON.stringify(rates))
     console.log(`rates done (${Date(rates.time)})`)
   }
@@ -57,6 +58,7 @@ const getRates = async (referenceTime = Date.now()) => {
 // referenceTime = Date.now() default is needed for when directly calling this from console
 const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
+  // need to check if financial.lastUpdatedTime is in utc or local. (23xx or +1 0700)
   if (!financials || notSameday(financials.time, referenceTime, EIGHTHRSMILLISECS)) {
     financials = { time: 0 }
     for (const symbol of counters) {
