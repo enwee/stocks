@@ -79,7 +79,7 @@ const getFinancials = async (referenceTime = Date.now()) => {
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
   const sdrs = { HBBD: { ratio: 5, currency: "HKD", code: "9988" } }
   const { ratio, currency, code } = sdrs[symbol]
-  const v = last * ratio * rates[currency] * 0.99 // apply 1% lower rate
+  const v = last * ratio * rates[currency]
   return { price: `${currency} ${v.toFixed(2)}`, code }
 }
 
