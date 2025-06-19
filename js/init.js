@@ -82,7 +82,7 @@ const handleTrades = rawLines => {
     const tradeCost = shares ? shares * price : price
     const totalCost = prevTotalCost + tradeCost
     const holdings = prevHoldings + shares
-    const avgPrice = totalCost / holdings
+    const avgPrice = holdings ? totalCost / holdings : 0
     prevDate = date
     prevHoldings = holdings
     prevTotalCost = totalCost
