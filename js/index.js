@@ -40,14 +40,14 @@ const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
   if (!rates || notSameday(rates.time, referenceTime, EIGHTHRSMILLISECS)) {
     console.log(`getting rates...`)
-    rates = {}
+    rates = { time: 0, lastUpdatedTime: "" }
     const resp = await fetch(urls.rates)
     const data = await resp.json()
     for (const rate of ["USD", "JPY", "CNY", "HKD"]) {
       rates[rate] = data.conversion_rates[rate]
     }
-    rates.time = data.time_last_update_unix * 1000 // store in local time
-    rates.time1 = new Date(rates.time).toString()
+    rates.time = Date.now()
+    rates.lastUpdatedTime = Date(data.time_last_update_unix * 1000)
     localStorage.setItem("rates", JSON.stringify(rates))
     console.log(`rates done (${Date(rates.time)})`)
   }
@@ -58,18 +58,18 @@ const getRates = async (referenceTime = Date.now()) => {
 const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
   if (!financials || notSameday(financials.time, referenceTime, EIGHTHRSMILLISECS)) {
-    financials = {}
+    financials = { time: 0 }
     for (const symbol of counters) {
       console.log(`getting financials ${symbol}...`)
       const resp = await fetch(useProxy(urls.financials.replace("{CODE}", symbol)))
       const data = (await resp.json()).data[0] || {}
       for (const key in data) {
-        data[key] = data[key] ? Number(data[key]) : data[key]
+        // data[key] can be null // data itself can be {}
+        data[key] = data[key] && key != "lastUpdatedTime" ? Number(data[key]) : data[key]
       }
       financials[symbol] = data
     }
     financials.time = Date.now()
-    financials.time1 = new Date(financials.time).toString()
     localStorage.setItem("financials", JSON.stringify(financials))
     console.log(`financials done (${Date(financials.time)})`)
   }
