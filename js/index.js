@@ -92,16 +92,18 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
-    let avg_price, mkt_value, gain_loss = null
+    let holdings = null, avg_price = null, mkt_value = null, gain_loss = null
     if (symbol in portfolio) {
       const rate = stocks[symbol].n.trim().endsWith("USD") ? 1 / rates.USD : 1
+      holdings = portfolio[symbol].holdings
       avg_price = portfolio[symbol].avg_price
-      mkt_value = Math.floor(stocks[symbol].lt * portfolio[symbol].holdings * rate)
-      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * portfolio[symbol].holdings * rate)
+      mkt_value = Math.floor(stocks[symbol].lt * holdings * rate)
+      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * holdings * rate)
       totals[type[stocks[symbol].type]].total += mkt_value
       totals[type[stocks[symbol].type]].gain_loss += gain_loss
     }
     stocks[symbol].avg_price = avg_price
+    stocks[symbol].holdings = holdings
     stocks[symbol].mkt_value = mkt_value
     stocks[symbol].gain_loss = gain_loss
     // what about PE/PB by last done
@@ -121,51 +123,49 @@ const updateDisplay = async (referenceTime = Date.now()) => {
 }
 
 // alpinejs x-data
-const data = () => {
-  return {
-    stocks: {},
-    totals: {},
-    time: {
-      initial: Date.now(),
-      rates: 0,
-      financials: 0,
-      quotes: 0,
-      interval: 0,
-    },
-    intervalId: 0,
-    async updateSelf(initial = false) {
-      if (initial || updateDue(this.time.quotes, this.time.interval)) {
-        // do not updateStocks(intervalTime) cos intervalTime === 0 for initial
-        const [stocks, ratesTime, financialsTime, quotesTime, totals] = await updateDisplay()
-        this.stocks = stocks
-        this.totals = totals
-        this.time.rates = ratesTime
-        this.time.financials = financialsTime
-        this.time.quotes = quotesTime
-        this.time.interval = Date.now() // so that no -1 and 0 secs ago
-      }
-      // to simulate change in data on every interval update
-      // for (symbol of Object.keys(portfolio).filter(() => Math.random() < 0.5)) {
-      //   this.stocks[symbol].mkt_value++
-      //   this.stocks[symbol].gain_loss++
-      // }
-    },
-    async init() {
-      await this.updateSelf(true)
-      this.intervalId = setInterval(
-        async () => {
-          if (notSameday(this.time.initial, this.time.interval)) {
-            location.reload()
-          }
-          this.time.interval = Date.now()
-          if (this.time.interval - this.time.quotes > 10000) {
-            // do only every 10s to cater for on going awaits
-            await this.updateSelf()
-          }
-        }, 1000);
+const data = () => ({
+  stocks: {},
+  totals: {},
+  time: {
+    initial: Date.now(),
+    rates: 0,
+    financials: 0,
+    quotes: 0,
+    interval: 0,
+  },
+  intervalId: 0,
+  async updateSelf(initial = false) {
+    if (initial || updateDue(this.time.quotes, this.time.interval)) {
+      // do not updateStocks(intervalTime) cos intervalTime === 0 for initial
+      const [stocks, ratesTime, financialsTime, quotesTime, totals] = await updateDisplay()
+      this.stocks = stocks
+      this.totals = totals
+      this.time.rates = ratesTime
+      this.time.financials = financialsTime
+      this.time.quotes = quotesTime
+      this.time.interval = Date.now() // so that no -1 and 0 secs ago
     }
+    // to simulate change in data on every interval update
+    // for (symbol of Object.keys(portfolio).filter(() => Math.random() < 0.5)) {
+    //   this.stocks[symbol].mkt_value++
+    //   this.stocks[symbol].gain_loss++
+    // }
+  },
+  async init() {
+    await this.updateSelf(true)
+    this.intervalId = setInterval(
+      async () => {
+        if (notSameday(this.time.initial, this.time.interval)) {
+          location.reload()
+        }
+        this.time.interval = Date.now()
+        if (this.time.interval - this.time.quotes > 10000) {
+          // do only every 10s to cater for on going awaits
+          await this.updateSelf()
+        }
+      }, 1000);
   }
-}
+})
 
 
 
@@ -210,6 +210,7 @@ const columns = [
 
   { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
   { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
   { label: "Avg Px", alias: "avg_price", type: "default", format: num => num ? num.toFixed(2) : "-" },
 
   { label: "Mkt Val", alias: "mkt_value", type: "watched", format: num => num ? numComma(num) : "-" },
@@ -227,9 +228,7 @@ const links = [
 const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
 const hhmmss = millisec => {
-  let hr = 0
-  let min = 0
-  let sec = Math.floor(millisec / 1000)
+  let hr = 0, min = 0, sec = Math.floor(millisec / 1000)
   if (sec > 59) {
     min = Math.floor(sec / 60)
     sec = sec % 60

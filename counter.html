@@ -7,14 +7,21 @@
     <title>stocks</title>
     <link rel="icon" href="images/favicon.ico" />
     <link rel="stylesheet" href="css/styles.css">
-    <script defer src="js/script.js"></script>
+    <!-- <script defer src="js/counter.js"></script> -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
+<script>
+    const get = key => JSON.parse(localStorage.getItem(key))
+    const names = get("names")
+    const trades = get("trades")
+</script>
+
 <body class="bg-black text-white">
-    <div class="p-2">
+    <div x-data="{symbol:location.search.slice(1)}" class="p-2">
+        <div x-text="names[symbol]"></div>
         <div>... Work in Progress ...</div>
-        <div x-data x-text="location.search.slice(1)"></div>
+        <pre x-text="JSON.stringify(trades[symbol], null, 2)"></pre>
     </div>
 </body>
 
