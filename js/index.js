@@ -9,12 +9,12 @@ const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 // datetime related
 const EIGHTHRSMILLISECS = 8 * 60 * 60 * 1000
 // time shifted back 8hrs to get Date change happening at 8am
-const notSameday = (t1, t2, shift = 0) => new Date(t1 - shift).toDateString() != new Date(t2 - shift).toDateString()
+const notSameday = (t1, t2, shift = 0) => new Date(t1 - shift).toDateString() !== new Date(t2 - shift).toDateString()
 const isWeekend = time => [0, 6].includes(new Date(time).getDay())
 const isAfter = (hhmm, time) => {
   const now = new Date(time), hour = now.getHours(), minute = now.getMinutes()
   const hh = Math.floor(hhmm / 100), mm = hhmm % 100
-  return hour > hh || (hour == hh && minute > mm)
+  return hour > hh || (hour === hh && minute > mm)
 }
 const updateDue = (processedTime, intervalTime) => notSameday(processedTime, intervalTime) ? true :
   isWeekend(intervalTime) ? false :
@@ -65,7 +65,7 @@ const getFinancials = async (referenceTime = Date.now()) => {
       const data = (await resp.json()).data[0] || {}
       for (const key in data) {
         // data[key] can be null // data itself can be {}
-        data[key] = data[key] && key != "lastUpdatedTime" ? Number(data[key]) : data[key]
+        data[key] = data[key] && key !== "lastUpdatedTime" ? Number(data[key]) : data[key]
       }
       financials[symbol] = data
     }
@@ -104,7 +104,7 @@ const updateDisplay = async (referenceTime = Date.now()) => {
     stocks[symbol].gain_loss = gain_loss
     // what about PE/PB by last done
     Object.assign(stocks[symbol], financials[symbol])
-    if (stocks[symbol].type == "adrs") {
+    if (stocks[symbol].type === "adrs") {
       stocks[symbol].sdrInfo = sdrInfo(stocks[symbol], rates)
     }
   }
@@ -133,7 +133,7 @@ const data = () => {
     intervalId: 0,
     async updateSelf(initial = false) {
       if (initial || updateDue(this.time.quotes, this.time.interval)) {
-        // do not updateStocks(intervalTime) cos intervalTime == 0 for initial
+        // do not updateStocks(intervalTime) cos intervalTime === 0 for initial
         const [stocks, ratesTime, financialsTime, quotesTime, totals] = await updateDisplay()
         this.stocks = stocks
         this.totals = totals
@@ -190,7 +190,7 @@ const columns = [
   {
     label: "52 week H/L", alias: "-", type: "52w",
     format: ({ fiftyTwoWeekHigh, fiftyTwoWeekLow, lt: last, h: high, l: low, type, sdrInfo }) => {
-      if (type == "adrs") {
+      if (type === "adrs") {
         return `(${sdrInfo.price})`
       }
       const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 50

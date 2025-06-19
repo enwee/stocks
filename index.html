@@ -29,7 +29,7 @@
               <tr :class="altBG(index % 2)">
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
-                    <template x-if="type=='name'">
+                    <template x-if="type==='name'">
                       <td :class="padding+border+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
                         `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
                         <div class="h-7 flex items-center text-sm/3.5 text-violet-400 hover:cursor-pointer"
@@ -47,19 +47,19 @@
                         </div>
                       </td>
                     </template>
-                    <template x-if="type=='52w'">
+                    <template x-if="type==='52w'">
                       <td :class="base+`${index?'':'border-t'}`">
                         <div class="flex items-center justify-center" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
-                    <template x-if="type=='default'">
+                    <template x-if="type==='default'">
                       <td :class="base+`${index?'':'border-t'}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
                       </td>
                     </template>
-                    <template x-if="type=='watched'">
+                    <template x-if="type==='watched'">
                       <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]', 
-                        (value, oldValue)=>value != oldValue ? toggle=!toggle : null)"
+                        (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
                         :class="`${base}${blink(toggle)}${index?'':'border-t'}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
                       </td>
