@@ -2,27 +2,79 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>stocks</title>
-    <link rel="icon" href="images/favicon.ico" />
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- <script defer src="js/counter.js"></script> -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>stocks</title>
+  <link rel="icon" href="images/favicon.ico" />
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- <script defer src="js/counter.js"></script> -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <script>
-    const get = key => JSON.parse(localStorage.getItem(key))
-    const names = get("names")
-    const trades = get("trades")
+  const symbol = location.search.slice(1)
+  const get = key => JSON.parse(localStorage.getItem(key))
+  const name = get("names")[symbol]
+  const trades = get("trades")[symbol]
+  const cur = trades.at(-1)
+
+  // css classes
+  const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
+  const border = "border border-gray-400 "
+  const padding = "py-1 px-2 "
+  const text = "text-lg text-gray-400 text-right "
+  const base = border + padding + text
+  const altBG = bool => bool ? "bg-slate-900" : "bg-stone-900"
+  const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
+
+  // html page table columns
+  const columns = [
+    {
+      label: "Date", alias: "date", format: str => { // d-m-y -> "d m 20y"
+        const dMy = str.split("-")
+        dMy[2] = "20" + dMy[2]
+        return dMy.join(" ")
+      }
+    },
+    { label: "", alias: "", format: str => str },
+    { label: "Shares", alias: "shares", format: num => numComma(num) },
+    { label: "Price", alias: "price", format: num => num },
+    { label: "Cost", alias: "tradeCost", format: num => numComma(num) },
+    { label: "", alias: "", format: str => str },
+    { label: "Holdings", alias: "holdings", format: num => numComma(num) },
+    { label: "Avg Px", alias: "avgPrice", format: num => num.toFixed(3) },
+    { label: "Total Cost", alias: "totalCost", format: num => numComma(num) },
+  ]
+
+  const numComma = num => Math.floor(num).toLocaleString()
 </script>
 
 <body class="bg-black text-white">
-    <div x-data="{symbol:location.search.slice(1)}" class="p-2">
-        <div x-text="names[symbol]"></div>
-        <div>... Work in Progress ...</div>
-        <pre x-text="JSON.stringify(trades[symbol], null, 2)"></pre>
-    </div>
+  <div x-data class="p-2">
+    <div class="text-2xl" x-text="`${name} (${symbol})`"></div>
+    <details class="py-2 w-max" open>
+      <summary class="py-1 text-xl text-violet-400"
+        x-text="`Trade History (${numComma(cur.holdings)} shares @ $${cur.avgPrice.toFixed(3)})`"></summary>
+      <table>
+        <thead>
+          <tr>
+            <template x-for="{label} in columns">
+              <th :class="header" x-text="label"></th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(trade,index) in trades">
+            <tr :class="altBG(index%2)">
+              <template x-for="{alias, format} in columns">
+                <td :class="base" x-text="format(trade[alias])"></td>
+              </template>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </details>
+  </div>
 </body>
 
 </html>

@@ -36,13 +36,17 @@
                           @click.prevent="show=true" x-text="format(stocks[symbol][alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
                           class="absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
-                          <template x-if="stocks[symbol].sdrInfo">
-                            <img src="images/hkex.png" class="size-7"
-                              @click="window.open(urls.hkex.replace('{CODE}',stocks[symbol].sdrInfo.code));show=false">
+                          <template x-if="symbol in sdrs">
+                            <img :src="`images/${sdrs[symbol].mkt}.png`" class="size-7 hover:cursor-pointer"
+                              @click="window.open(urls[sdrs[symbol].mkt].replace('{CODE}',sdrs[symbol].code));show=false">
                           </template>
-                          <template x-for="{name, icon, ext} in links">
-                            <img :src="`images/${icon}`" class="size-7"
-                              @click="window.open(ext?urls[name].replace('{CODE}',symbol):location.origin+`/stocks/${name}.html?${symbol}`);show=false">
+                          <template x-for="{name, icon} in links">
+                            <img :src="`images/${icon}`" class="size-7 hover:cursor-pointer"
+                              @click="window.open(urls[name].replace('{CODE}',symbol));show=false">
+                          </template>
+                          <template x-if="symbol in portfolio">
+                            <img src="images/money.png" class="size-7 hover:cursor-pointer"
+                              @click="window.open(location.origin+`/stocks/counter.html?${symbol}`);show=false">
                           </template>
                         </div>
                       </td>

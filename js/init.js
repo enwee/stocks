@@ -11,6 +11,11 @@ const xData = () => ({
     const file = await fileHandle.getFile();
     reader.readAsText(file)
     reader.onload = () => handleFile(file, this)
+  },
+  save() {
+    localStorage.setItem(this.key.trim(), this.value)
+    setTimeout((key) => this.key = key, 1000, this.key)
+    this.key = '', this.value = ''
   }
 })
 
@@ -18,17 +23,23 @@ const handleFile = (file, xData) => {
   switch (file.type) {
     case "application/json": {
       const data = JSON.parse(reader.result)
+      let index = 1
       for (const key in data) {
         localStorage.setItem(key, JSON.stringify(data[key]))
+        setTimeout(key => xData.key = key, index * 1000, key)
+        index += 2
       }
       xData.msg = "json processed"
+      setTimeout(() => xData.msg = "Data", 2000)
       break
     }
     case "text/csv":
       xData.msg = handleCSV(reader.result)
+      setTimeout(() => xData.msg = "Data", 2000)
       break
     default:
       xData.msg = "Not JSON/CSV, logged to console"
+      setTimeout(() => xData.msg = "Data", 2000)
       console.log(reader.result)
   }
 }

@@ -33,7 +33,7 @@
         <input style="width:128px" x-model="value" placeholder="value">
       </div>
       <div style="padding-top: 4px">
-        <button @click="localStorage.setItem(key.trim(), value); key=''; value=''">save</button>
+        <button @click="save">save</button>
         <button @click="localStorage.removeItem(key.trim()); key=''; value=''">remove ⚠️⛔</button>
       </div>
     </div>

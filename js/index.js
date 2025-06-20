@@ -3,7 +3,10 @@ const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
 const display = get("display")
 const counters = Object.values(display).flat()
-const portfolio = get("portfolio")
+const portfolio = get("portfolio") // get from trades map trades.at(-1)?
+// const sdrs = get("sdrs")
+// put sdrs in common.json
+const sdrs = { HBBD: { ratio: 5, currency: "HKD", mkt: "hkex", code: "9988" } }
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
 // datetime related
@@ -79,10 +82,9 @@ const getFinancials = async (referenceTime = Date.now()) => {
 }
 
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
-  const sdrs = { HBBD: { ratio: 5, currency: "HKD", code: "9988" } }
-  const { ratio, currency, code } = sdrs[symbol]
+  const { ratio, currency } = sdrs[symbol]
   const v = last * ratio * rates[currency]
-  return { price: `${currency} ${v.toFixed(2)}`, code }
+  return `${currency} ${v.toFixed(2)}`
 }
 
 const updateDisplay = async (referenceTime = Date.now()) => {
@@ -193,10 +195,10 @@ const columns = [
     label: "52 week H/L", alias: "-", type: "52w",
     format: ({ fiftyTwoWeekHigh, fiftyTwoWeekLow, lt: last, h: high, l: low, type, sdrInfo }) => {
       if (type === "adrs") {
-        return `(${sdrInfo.price})`
+        return `(${sdrInfo})`
       }
       const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 50
-      return `<div class="w-12">${fiftyTwoWeekHigh}</div>
+      return pixel ? `<div class="w-12">${fiftyTwoWeekHigh}</div>
       <div class="p-2">
       <svg class="bg-violet-900" width="50" height="10" xmlns="http://www.w3.org/2000/svg">
       <rect class="fill-current text-violet-400" height="10" 
@@ -204,7 +206,7 @@ const columns = [
       <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
       </svg>
       </div>
-      <div class="text-left w-12">${fiftyTwoWeekLow}</div>`
+      <div class="text-left w-12">${fiftyTwoWeekLow}</div>` : "-"
     }
   },
 
@@ -218,11 +220,10 @@ const columns = [
 ]
 
 const links = [
-  { name: "sgx", icon: "sgx.ico", ext: true },
-  { name: "yahoo", icon: "yahoo.png", ext: true },
-  { name: "google", icon: "google.png", ext: true },
-  { name: "divsg", icon: "divsg.png", ext: true },
-  { name: "counter", icon: "money.png", ext: false },
+  { name: "sgx", icon: "sgx.ico" },
+  { name: "yahoo", icon: "yahoo.png" },
+  { name: "google", icon: "google.png" },
+  { name: "divsg", icon: "divsg.png" },
 ]
 
 const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
