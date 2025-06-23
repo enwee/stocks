@@ -74,16 +74,19 @@ const handleCSV = rawStr => {
 const handleTrades = rawLines => {
   const symbolName = {}, trades = {}, portfolio = {} // going to localStorage
   let stockCode = "", tradesOfaStock = [], prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+
+  const storePrevious = () => {
+    const { holdings, avgPrice } = tradesOfaStock.at(-1)
+    trades[stockCode] = tradesOfaStock
+    portfolio[stockCode] = { holdings, avgPrice }
+    tradesOfaStock = [], prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+  }
+
   for (const rawLine of rawLines) {
     let [name, shares, price, date, code] = rawLine.trimEnd().split(',')
-    if (name && code) {
-      if (tradesOfaStock.length > 0) {
-        trades[stockCode] = tradesOfaStock // store previous stock trades[]
-        // legacy; to change
-        portfolio[stockCode] = { holdings: tradesOfaStock.at(-1).holdings, avg_price: tradesOfaStock.at(-1).avgPrice }
-      }
-      stockCode = code, symbolName[code] = name
-      tradesOfaStock = [], prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+    if (name && code) { // initial stock no storePrevious but MUST assign name/code
+      if (tradesOfaStock.length > 0) storePrevious()
+      stockCode = code, symbolName[code] = name // only assign this AFTER storePrevious()
     }
     if (new Date(date) < new Date(prevDate)) {
       return `Error: ${stockCode} prev:${prevDate} current:${date} `
@@ -98,10 +101,8 @@ const handleTrades = rawLines => {
     prevHoldings = holdings
     prevTotalCost = totalCost
     tradesOfaStock.push({ date, shares, price, tradeCost, holdings, avgPrice, totalCost })
+    if (rawLine === rawLines.at(-1)) storePrevious() // store when final iteration
   }
-  trades[stockCode] = tradesOfaStock
-  // legacy; to change
-  portfolio[stockCode] = { holdings: tradesOfaStock.at(-1).holdings, avg_price: tradesOfaStock.at(-1).avgPrice } // legacy to change
 
   localStorage.setItem("names", JSON.stringify(symbolName))
   localStorage.setItem("trades", JSON.stringify(trades))

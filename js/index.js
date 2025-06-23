@@ -94,22 +94,17 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
-    let holdings = null, avg_price = null, mkt_value = null, gain_loss = null
+    let mkt_value = null, gain_loss = null
     if (symbol in portfolio) {
       const rate = stocks[symbol].n.trim().endsWith("USD") ? 1 / rates.USD : 1
-      holdings = portfolio[symbol].holdings
-      avg_price = portfolio[symbol].avg_price
+      const { holdings, avgPrice } = portfolio[symbol]
       mkt_value = Math.floor(stocks[symbol].lt * holdings * rate)
-      gain_loss = Math.floor((stocks[symbol].lt - avg_price) * holdings * rate)
+      gain_loss = Math.floor((stocks[symbol].lt - avgPrice) * holdings * rate)
       totals[type[stocks[symbol].type]].total += mkt_value
       totals[type[stocks[symbol].type]].gain_loss += gain_loss
     }
-    stocks[symbol].avg_price = avg_price
-    stocks[symbol].holdings = holdings
-    stocks[symbol].mkt_value = mkt_value
-    stocks[symbol].gain_loss = gain_loss
     // what about PE/PB by last done
-    Object.assign(stocks[symbol], financials[symbol])
+    Object.assign(stocks[symbol], financials[symbol], portfolio[symbol], { mkt_value, gain_loss })
     if (stocks[symbol].type === "adrs") {
       stocks[symbol].sdrInfo = sdrInfo(stocks[symbol], rates)
     }
@@ -213,7 +208,7 @@ const columns = [
   { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
   { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
   // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
-  { label: "Avg Px", alias: "avg_price", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  { label: "Avg Px", alias: "avgPrice", type: "default", format: num => num ? num.toFixed(2) : "-" },
 
   { label: "Mkt Val", alias: "mkt_value", type: "watched", format: num => num ? numComma(num) : "-" },
   { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: num => num !== null ? numComma(num, true) : "-" },
