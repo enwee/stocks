@@ -4,53 +4,64 @@ const xData = () => ({
   key: '',
   value: '',
   page: 'index',
-  msg: "Data",
+  msg: "",
   async getFile() {
     // Open file picker and destructure the result of first handle
     const [fileHandle] = await window.showOpenFilePicker();
     const file = await fileHandle.getFile();
     reader.readAsText(file)
-    reader.onload = () => handleFile(file, this)
+    reader.onload = () => handleFile(file, this.setMsg.bind(this)) // else this in setMsg goes to window object
   },
   save() {
     localStorage.setItem(this.key.trim(), this.value)
     setTimeout((key) => this.key = key, 1000, this.key)
     this.key = '', this.value = ''
+  },
+  setMsg(msg, clear = true) {
+    this.msg = msg
+    if (clear && !msg.startsWith("Error")) setTimeout(() => this.msg = "", 4000)
   }
 })
 
-const handleFile = (file, xData) => {
+const handleFile = (file, setMsg) => {
+  setMsg(`processing [${file.name}] ...`, false)
   switch (file.type) {
-    case "application/json": {
-      const data = JSON.parse(reader.result)
-      let index = 1
-      for (const key in data) {
-        localStorage.setItem(key, JSON.stringify(data[key]))
-        setTimeout(key => xData.key = key, index * 1000, key)
-        index += 2
-      }
-      xData.msg = "json processed"
-      setTimeout(() => xData.msg = "Data", 2000)
+    case "application/json":
+      setMsg(handleJSON(reader.result))
       break
-    }
     case "text/csv":
-      xData.msg = handleCSV(reader.result)
-      setTimeout(() => xData.msg = "Data", 2000)
+      setMsg(handleCSV(reader.result))
       break
     default:
-      xData.msg = "Not JSON/CSV, logged to console"
-      setTimeout(() => xData.msg = "Data", 2000)
+      setMsg("Not JSON/CSV, logged to console")
       console.log(reader.result)
   }
 }
 
+const handleJSON = rawStr => {
+  let msg = ""
+  const data = JSON.parse(rawStr)
+  for (const key in data) {
+    switch (key) {
+      case "trades":
+        msg = handleTrades(data[key])
+        break
+      default:
+        localStorage.setItem(key, JSON.stringify(data[key]))
+    }
+  }
+  msg = msg || `[${Object.keys(data)}] stored`
+  return msg
+}
+
 const handleCSV = rawStr => {
-  let msg = null
+  let msg = ""
   const rawLines = rawStr.trimEnd().split("\n")
   const header = rawLines.shift().trimEnd().split(",")
   switch (JSON.stringify(header)) {
+    // prev when trades stored in csv
     case JSON.stringify(["name", "shares", "price", "date", "symbol"]):
-      msg = handleTrades(rawLines)
+      // msg = handleTrades(rawLines)
       break
     case JSON.stringify(["example", "ex", "pay", "rate", "symbol"]):
       break
@@ -64,49 +75,52 @@ const handleCSV = rawStr => {
         }
         rows.push(rowObject)
       }
-      msg = "Not known CSV, logged to console"
+      msg = "Not known CSV type, rows logged to console"
       console.log(rows)
     }
   }
   return msg
 }
 
-const handleTrades = rawLines => {
-  const symbolName = {}, trades = {}, portfolio = {} // going to localStorage
-  let stockCode = "", tradesOfaStock = [], prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
-
-  const storePrevious = () => {
-    const { holdings, avgPrice } = tradesOfaStock.at(-1)
-    trades[stockCode] = tradesOfaStock
-    portfolio[stockCode] = { holdings, avgPrice }
-    tradesOfaStock = [], prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+const handleTrades = trades => {
+  let msg = ""
+  const names = {}, portfolio = {}
+  for (const [symbol, csvTrades] of Object.entries(trades)) {
+    const { name, rows } = csvsToObject(csvTrades)
+    names[symbol] = name
+    let prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+    trades[symbol] = rows.map(({ tradeDate, shares, price }) => {
+      if (new Date(tradeDate) < new Date(prevDate)) {
+        msg = `Error: ${symbol} prev:${prevDate} current:${tradeDate}`
+        return {}
+      }
+      const tradeCost = shares ? shares * price : price
+      const totalCost = prevTotalCost + tradeCost
+      const holdings = prevHoldings + shares
+      const avgPrice = holdings ? totalCost / holdings : 0
+      prevDate = tradeDate
+      prevHoldings = holdings
+      prevTotalCost = totalCost
+      return { tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost }
+    })
+    const { holdings, avgPrice } = trades[symbol].at(-1)
+    portfolio[symbol] = { holdings, avgPrice }
   }
-
-  for (const rawLine of rawLines) {
-    let [name, shares, price, date, code] = rawLine.trimEnd().split(',')
-    if (name && code) { // initial stock no storePrevious but MUST assign name/code
-      if (tradesOfaStock.length > 0) storePrevious()
-      stockCode = code, symbolName[code] = name // only assign this AFTER storePrevious()
-    }
-    if (new Date(date) < new Date(prevDate)) {
-      return `Error: ${stockCode} prev:${prevDate} current:${date} `
-    }
-    shares = Number(shares)
-    price = Number(price)
-    const tradeCost = shares ? shares * price : price
-    const totalCost = prevTotalCost + tradeCost
-    const holdings = prevHoldings + shares
-    const avgPrice = holdings ? totalCost / holdings : 0
-    prevDate = date
-    prevHoldings = holdings
-    prevTotalCost = totalCost
-    tradesOfaStock.push({ date, shares, price, tradeCost, holdings, avgPrice, totalCost })
-    if (rawLine === rawLines.at(-1)) storePrevious() // store when final iteration
-  }
-
-  localStorage.setItem("names", JSON.stringify(symbolName))
+  localStorage.setItem("names", JSON.stringify(names))
   localStorage.setItem("trades", JSON.stringify(trades))
   localStorage.setItem("portfolio", JSON.stringify(portfolio))
-  return "trades processed"
+  return msg
 }
 
+const csvsToObject = csvs => {
+  const header = csvs.shift().split(",")
+  const name = header.pop()
+  const rows = csvs.map(csv => {
+    const obj = {}
+    for (const [index, data] of csv.split(",").entries()) {
+      obj[header[index]] = header[index].endsWith("Date") ? data : Number(data)
+    }
+    return obj
+  })
+  return { name, rows }
+}

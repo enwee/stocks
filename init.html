@@ -15,8 +15,8 @@
 </script>
 
 <body>
+  <h1>Data</h1>
   <div x-data="xData">
-    <h1 x-text="msg"></h1>
     <div :style="padding">
       <input style="width:48px" x-model="page" placeholder="page">
       <button @click="location.href=location.origin+`/stocks/js/${page}.js`">js</button>
@@ -26,6 +26,7 @@
     <div :style="padding">
       <button @click="getFile">from file</button>
       <button @click="localStorage.clear()">clear all data ⚠️⛔</button>
+      <div :style="msg.startsWith('Error')?'color: red':null" x-text="msg"></div>
     </div>
     <div :style="padding">
       <div>
