@@ -3,7 +3,7 @@ const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
 const display = get("display")
 const counters = Object.values(display).flat()
-const portfolio = Object.fromEntries(Object.entries(get("trades")).map(([key, value]) => [key, value.at(-1)]))
+const portfolio = Object.fromEntries(Object.entries(get("trades")).map(([k, v]) => [k, v.at(-1)]))
 const sdrs = get("sdrs")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
@@ -27,11 +27,10 @@ const getQuotes = async () => {
   console.log('getting quotes...')
   const resp = await fetch(useProxy(urls.quotes))
   const data = await resp.json()
-  const quotes = data.data.prices.filter(quote => counters.includes(quote.nc))
-    .reduce((acc, quote) => {
-      acc[quote.nc] = quote
-      return acc
-    }, {})
+  const quotes = Object.fromEntries(
+    data.data.prices.filter(quote => counters.includes(quote.nc))
+      .map(quote => [quote.nc, quote])
+  )
   console.log(`quotes done (${Date(data.meta.processedTime)})`)
   return [quotes, data.meta.processedTime]
 }
@@ -118,7 +117,7 @@ const updateDisplay = async (referenceTime = Date.now()) => {
 }
 
 // alpinejs x-data
-const data = () => ({
+const xData = () => ({
   stocks: {},
   totals: {},
   time: {
@@ -194,7 +193,7 @@ const columns = [
       return pixel ? `<div class="w-12">${fiftyTwoWeekHigh}</div>
       <div class="p-2">
       <svg class="bg-violet-900" width="50" height="10" xmlns="http://www.w3.org/2000/svg">
-      <rect class="fill-current text-violet-400" height="10" 
+      <rect class="fill-current text-violet-400" height="10"
       width="${(high - low) / pixel}" x="${(fiftyTwoWeekHigh - high) / pixel}" />
       <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
       </svg>

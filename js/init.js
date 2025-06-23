@@ -84,10 +84,8 @@ const handleCSV = rawStr => {
 
 const handleTrades = trades => {
   let msg = ""
-  const names = {}
   for (const [symbol, csvTrades] of Object.entries(trades)) {
-    const { name, rows } = csvsToObject(csvTrades)
-    names[symbol] = name
+    const { rows } = csvsToObject(csvTrades)
     let prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
     trades[symbol] = rows.map(({ tradeDate, shares, price }) => {
       if (new Date(tradeDate) < new Date(prevDate)) {
@@ -104,14 +102,13 @@ const handleTrades = trades => {
       return { tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost }
     })
   }
-  localStorage.setItem("names", JSON.stringify(names))
   localStorage.setItem("trades", JSON.stringify(trades))
   return msg
 }
 
 const csvsToObject = csvs => {
   const header = csvs.shift().split(",")
-  const name = header.pop()
+  const meta = header.pop()
   const rows = csvs.map(csv => {
     const obj = {}
     for (const [index, data] of csv.split(",").entries()) {
@@ -119,5 +116,5 @@ const csvsToObject = csvs => {
     }
     return obj
   })
-  return { name, rows }
+  return { meta, rows }
 }

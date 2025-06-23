@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-black text-white">
-  <template x-data="data" x-if="JSON.stringify(stocks) !== '{}'">
+  <template x-data="xData" x-if="JSON.stringify(stocks) !== '{}'">
     <div class="p-2 space-y-4">
 
       <table class="border-separate border-spacing-0">
@@ -62,7 +62,7 @@
                       </td>
                     </template>
                     <template x-if="type==='watched'">
-                      <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]', 
+                      <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]',
                         (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
                         :class="`${base}${blink(toggle)}${index?'':'border-t'}`">
                         <div x-html="format(stocks[symbol][alias])"></div>
