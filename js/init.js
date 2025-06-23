@@ -84,7 +84,7 @@ const handleCSV = rawStr => {
 
 const handleTrades = trades => {
   let msg = ""
-  const names = {}, portfolio = {}
+  const names = {}
   for (const [symbol, csvTrades] of Object.entries(trades)) {
     const { name, rows } = csvsToObject(csvTrades)
     names[symbol] = name
@@ -103,12 +103,9 @@ const handleTrades = trades => {
       prevTotalCost = totalCost
       return { tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost }
     })
-    const { holdings, avgPrice } = trades[symbol].at(-1)
-    portfolio[symbol] = { holdings, avgPrice }
   }
   localStorage.setItem("names", JSON.stringify(names))
   localStorage.setItem("trades", JSON.stringify(trades))
-  localStorage.setItem("portfolio", JSON.stringify(portfolio))
   return msg
 }
 

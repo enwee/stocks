@@ -3,7 +3,7 @@ const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
 const display = get("display")
 const counters = Object.values(display).flat()
-const portfolio = get("portfolio") // get from trades map trades.at(-1)?
+const portfolio = Object.fromEntries(Object.entries(get("trades")).map(([key, value]) => [key, value.at(-1)]))
 const sdrs = get("sdrs")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
