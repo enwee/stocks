@@ -196,6 +196,9 @@
   .-right-1\.75 {
     right: calc(var(--spacing) * -1.75);
   }
+  .-right-3\.25 {
+    right: calc(var(--spacing) * -3.25);
+  }
   .-bottom-1\.75 {
     bottom: calc(var(--spacing) * -1.75);
   }

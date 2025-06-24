@@ -57,3 +57,5 @@ const columns = [
 ]
 
 const numComma = num => Math.floor(num).toLocaleString()
+
+const currency = (str = "USD") => `<span class='relative'><div class='text-[10px] absolute -top-1 -right-3.25'>${str}</div></span>`
