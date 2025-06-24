@@ -14,7 +14,6 @@
 <body class="bg-black text-white">
   <template x-data="xData" x-if="JSON.stringify(stocks) !== '{}'">
     <div class="p-2 space-y-4">
-
       <table class="border-separate border-spacing-0">
         <thead class="sticky top-2 z-10 bg-black shadow-[0_-0.5rem] shadow-black">
           <tr>
@@ -26,16 +25,16 @@
         <template x-for="stockType in Object.keys(display)">
           <tbody>
             <template x-for="(symbol, index) in display[stockType]">
-              <tr :class="altBG(index % 2)">
+              <tr :class="altBG(index % 2)" x-data="{stock:stocks[symbol]}">
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type==='name'">
-                      <td :class="padding+border+'border-l shadow-[-0.5rem_0] shadow-black sticky left-2 '+
+                      <td :class="padding+border+'border-l relative '+
                         `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
                         <div class="h-7 flex items-center text-sm/3.5 text-violet-400 hover:cursor-pointer"
-                          @click.prevent="show=true" x-text="format(stocks[symbol][alias])"></div>
+                          @click.prevent="show=true" x-text="format(stock[alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
-                          class="absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
+                          class="z-50 absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
                           <template x-if="symbol in sdrs">
                             <img :src="`images/${sdrs[symbol].mkt}.png`" class="size-7 hover:cursor-pointer"
                               @click="window.open(urls[sdrs[symbol].mkt].replace('{CODE}',sdrs[symbol].code));show=false">
@@ -53,19 +52,19 @@
                     </template>
                     <template x-if="type==='52w'">
                       <td :class="base+`${index?'':'border-t'}`">
-                        <div class="flex items-center justify-center" x-html="format(stocks[symbol])"></div>
+                        <div class="relative flex items-center justify-center" x-html="format(stock)"></div>
                       </td>
                     </template>
                     <template x-if="type==='default'">
                       <td :class="base+`${index?'':'border-t'}`">
-                        <div x-html="format(stocks[symbol][alias])"></div>
+                        <div class="relative" x-html="format(stock[alias],stock.usd)"></div>
                       </td>
                     </template>
                     <template x-if="type==='watched'">
-                      <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]',
+                      <td x-data="{ toggle: true }" x-init="$watch('stock[alias]',
                         (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
                         :class="`${base}${blink(toggle)}${index?'':'border-t'}`">
-                        <div x-html="format(stocks[symbol][alias])"></div>
+                        <div class="relative" x-html="format(stock[alias],stock.usd)"></div>
                       </td>
                     </template>
                   </div>

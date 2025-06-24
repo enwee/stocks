@@ -14,6 +14,7 @@ const xData = () => ({
   },
   save() {
     localStorage.setItem(this.key.trim(), this.value)
+    if (this.key === "trades") processTrades()
     setTimeout((key) => this.key = key, 1000, this.key)
     this.key = '', this.value = ''
   },
@@ -42,12 +43,12 @@ const handleJSON = rawStr => {
   let msg = ""
   const data = JSON.parse(rawStr)
   for (const key in data) {
+    localStorage.setItem(key, JSON.stringify(data[key]))
     switch (key) {
       case "trades":
-        msg = handleTrades(data[key])
+        msg = processTrades()
         break
       default:
-        localStorage.setItem(key, JSON.stringify(data[key]))
     }
   }
   msg = msg || `[${Object.keys(data)}] stored`
@@ -82,7 +83,8 @@ const handleCSV = rawStr => {
   return msg
 }
 
-const handleTrades = trades => {
+const processTrades = () => {
+  const trades = JSON.parse(localStorage.getItem("trades"))
   let msg = ""
   for (const [symbol, csvTrades] of Object.entries(trades)) {
     const { rows } = csvsToObject(csvTrades)

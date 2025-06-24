@@ -5,8 +5,10 @@ const cur = trades.at(-1)
 
 const xData = () => ({
   name: "",
+  usd: false,
   async init() {
     this.name = (await getNames())[symbol]
+    this.usd = this.name.endsWith("USD")
   }
 })
 
@@ -46,12 +48,12 @@ const columns = [
     }
   },
   { label: "Shares", alias: "shares", format: num => numComma(num) },
-  { label: "Price", alias: "price", format: num => num },
-  { label: "Cost", alias: "tradeCost", format: num => numComma(num) },
+  { label: "Price", alias: "price", format: num => num.toFixed(3), addLabel: true },
+  { label: "Cost", alias: "tradeCost", format: num => numComma(num), addLabel: true },
   { label: "", alias: "", format: str => "⟶" },
   { label: "Holdings", alias: "holdings", format: num => numComma(num) },
-  { label: "Avg Px", alias: "avgPrice", format: num => num.toFixed(3) },
-  { label: "Total Cost", alias: "totalCost", format: num => numComma(num) },
+  { label: "Avg Px", alias: "avgPrice", format: num => num.toFixed(3), addLabel: true },
+  { label: "Total Cost", alias: "totalCost", format: num => numComma(num), addLabel: true },
 ]
 
 const numComma = num => Math.floor(num).toLocaleString()

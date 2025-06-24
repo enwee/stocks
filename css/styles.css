@@ -181,6 +181,9 @@
   .absolute {
     position: absolute;
   }
+  .relative {
+    position: relative;
+  }
   .sticky {
     position: sticky;
   }
@@ -190,6 +193,12 @@
   .top-2 {
     top: calc(var(--spacing) * 2);
   }
+  .-right-1\.75 {
+    right: calc(var(--spacing) * -1.75);
+  }
+  .-bottom-1\.75 {
+    bottom: calc(var(--spacing) * -1.75);
+  }
   .left-2 {
     left: calc(var(--spacing) * 2);
   }
@@ -198,6 +207,9 @@
   }
   .z-10 {
     z-index: 10;
+  }
+  .z-50 {
+    z-index: 50;
   }
   .contents {
     display: contents;
@@ -368,6 +380,9 @@
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
   }
+  .text-\[10px\] {
+    font-size: 10px;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -385,10 +400,6 @@
   }
   .text-white {
     color: var(--color-white);
-  }
-  .shadow-\[-0\.5rem_0\] {
-    --tw-shadow: -0.5rem 0 var(--tw-shadow-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .shadow-\[0_-0\.5rem\] {
     --tw-shadow: 0 -0.5rem var(--tw-shadow-color, currentcolor);

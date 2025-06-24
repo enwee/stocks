@@ -91,9 +91,10 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   const totals = { reits: { total: 0, gain_loss: 0 }, stocks: { total: 0, gain_loss: 0 }, monitored: { total: 0, gain_loss: 0 } }
   const type = { adrs: "stocks", stocks: "stocks", reits: "reits", businesstrusts: "reits" }
   for (const symbol in stocks) {
-    let mkt_value = null, gain_loss = null
+    let mkt_value = null, gain_loss = null, usd = null
     if (symbol in portfolio) {
-      const rate = stocks[symbol].n.trim().endsWith("USD") ? 1 / rates.USD : 1
+      usd = stocks[symbol].n.trim().endsWith("USD")
+      const rate = usd ? 1 / rates.USD : 1
       const { holdings, avgPrice } = portfolio[symbol]
       mkt_value = Math.floor(stocks[symbol].lt * holdings * rate)
       gain_loss = Math.floor((stocks[symbol].lt - avgPrice) * holdings * rate)
@@ -101,7 +102,7 @@ const updateDisplay = async (referenceTime = Date.now()) => {
       totals[type[stocks[symbol].type]].gain_loss += gain_loss
     }
     // what about PE/PB by last done
-    Object.assign(stocks[symbol], financials[symbol], portfolio[symbol], { mkt_value, gain_loss })
+    Object.assign(stocks[symbol], financials[symbol], portfolio[symbol], { mkt_value, gain_loss, usd })
     if (stocks[symbol].type === "adrs") {
       stocks[symbol].sdrInfo = sdrInfo(stocks[symbol], rates)
     }
@@ -176,16 +177,16 @@ const columns = [
     }
   },
 
-  { label: "Last", alias: "lt", type: "watched", format: num => num },
-  { label: "Change", alias: "c", type: "watched", format: num => `<div class="${color(num)}">${num}</div>` },
+  { label: "Last", alias: "lt", type: "watched", format: (num, usd) => num + (usd ? currency() : "") },
+  { label: "Change", alias: "c", type: "watched", format: (num, usd) => `<div class="${color(num)}">${num}</div>` + (usd ? currency() : "") },
   { label: "%", alias: "p", type: "watched", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
 
-  { label: "High", alias: "h", type: "default", format: num => num },
-  { label: "Low", alias: "l", type: "default", format: num => num },
+  { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
+  { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
 
   {
     label: "52 week H/L", alias: "-", type: "52w",
-    format: ({ fiftyTwoWeekHigh, fiftyTwoWeekLow, lt: last, h: high, l: low, type, sdrInfo }) => {
+    format: ({ fiftyTwoWeekHigh, fiftyTwoWeekLow, lt: last, h: high, l: low, type, sdrInfo, usd }) => {
       if (type === "adrs") {
         return `(${sdrInfo})`
       }
@@ -198,17 +199,17 @@ const columns = [
       <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
       </svg>
       </div>
-      <div class="text-left w-12">${fiftyTwoWeekLow}</div>` : "-"
+      <div class="text-left w-12">${fiftyTwoWeekLow}</div>${usd ? currency() : ""}` : "-"
     }
   },
 
   { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
   { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
   // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
-  { label: "Avg Px", alias: "avgPrice", type: "default", format: num => num ? num.toFixed(2) : "-" },
+  { label: "Avg Px", alias: "avgPrice", type: "default", format: (num, usd) => num ? num.toFixed(2) + (usd ? currency() : "") : "-" },
 
-  { label: "Mkt Val", alias: "mkt_value", type: "watched", format: num => num ? numComma(num) : "-" },
-  { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: num => num !== null ? numComma(num, true) : "-" },
+  { label: "Mkt Val", alias: "mkt_value", type: "watched", format: (num, usd) => num ? numComma(num) + (usd ? currency("SGD") : "") : "-" },
+  { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: (num, usd) => num !== null ? numComma(num, true) + (usd ? currency("SGD") : "") : "-" },
 ]
 
 const links = [
@@ -234,6 +235,8 @@ const hhmmss = millisec => {
 }
 
 const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date(time).toDateString()
+
+const currency = (str = "USD") => `<div class='text-[10px] absolute -right-1.75 -bottom-1.75'>${str}</div>`
 
 // css classes
 const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "

@@ -15,14 +15,14 @@
   <div x-data="xData" class="p-2">
     <div class="text-2xl" x-text="`${name} (${symbol})`"></div>
     <details class="py-2 w-max" open>
-      <!-- put USD for USD values -->
       <summary class="py-1 text-xl text-violet-400"
-        x-text="`Trade History (${numComma(cur.holdings)} shares @ $${cur.avgPrice.toFixed(3)})`"></summary>
+        x-text="`Trade History (${numComma(cur.holdings)} shares @ $${cur.avgPrice.toFixed(3)}${usd?'🇺🇸':''})`">
+      </summary>
       <table>
         <thead>
           <tr>
-            <template x-for="{label} in columns">
-              <th :class="header" x-text="label"></th>
+            <template x-for="{label, addLabel} in columns">
+              <th :class="header" x-text="label+(addLabel?(usd?' 🇺🇸':''):'')"></th>
             </template>
           </tr>
         </thead>
