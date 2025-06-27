@@ -167,7 +167,7 @@ const xData = () => ({
 // html page table columns
 const columns = [
   {
-    label: "Company Name", alias: "n", type: "name", format: name => {
+    label: "", alias: "n", type: "name", format: name => {
       const words = name.split(" ")
       if (words.length > 2) {
         name = words.slice(0, 3).join(" ")
@@ -183,7 +183,7 @@ const columns = [
 
   { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
   { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
-  // { label: "Vol(000s)", alias: "vl", type: "watched", format: num => num ? numComma(num) : "-" },
+  { label: "Vol(000s)", alias: "vl", type: "watched", format: num => num ? numComma(num) : "-" },
 
   {
     label: "52 week H/L", alias: "-", type: "52w",
@@ -206,7 +206,7 @@ const columns = [
 
   { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
   { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
-  // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
+  { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
   { label: "Avg Px", alias: "avgPrice", type: "default", format: (num, usd) => num ? num.toFixed(2) + (usd ? currency() : "") : "-" },
 
   { label: "Mkt Val", alias: "mkt_value", type: "watched", format: (num, usd) => num ? numComma(num) + (usd ? currency("SGD") : "") : "-" },
@@ -240,10 +240,10 @@ const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date
 const currency = (str = "USD") => `<div class='text-[10px] absolute -right-1.75 -bottom-1.75'>${str}</div>`
 
 // css classes
-const header = "pb-2 px-2 text-gray-400 whitespace-nowrap "
+const header = "p-2 text-sm text-gray-400 whitespace-nowrap"
 const border = "border-b border-r border-gray-400 "
 const padding = "py-1 px-2 "
-const text = "text-lg text-gray-400 text-right "
+const text = "text-gray-400 text-right "
 const base = border + padding + text
 const green = "text-emerald-500"
 const red = "text-rose-700"

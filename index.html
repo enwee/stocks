@@ -13,9 +13,9 @@
 
 <body class="bg-black text-white">
   <template x-data="xData" x-if="JSON.stringify(stocks) !== '{}'">
-    <div class="p-2 space-y-4">
+    <div class="overflow-auto h-screen px-2 space-y-4">
       <table class="border-separate border-spacing-0">
-        <thead class="sticky top-2 z-10 bg-black shadow-[0_-0.5rem] shadow-black">
+        <thead class="sticky top-0 z-20 bg-black shadow-[0_-0.5rem] shadow-black">
           <tr>
             <template x-for="{label} in columns">
               <th :class="header" x-text="label"></th>
@@ -29,12 +29,12 @@
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type==='name'">
-                      <td :class="padding+border+'border-l relative '+
+                      <td :class="'sticky left-0 z-10 shadow-[-0.5rem_0] shadow-black border-l '+padding+border+
                         `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
                         <div class="h-7 flex items-center text-sm/3.5 text-violet-400 hover:cursor-pointer"
                           @click.prevent="show=true" x-text="format(stocks[symbol][alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
-                          class="z-50 absolute -top-1 left-34 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
+                          class="absolute -top-1 left-30 p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
                           <template x-if="symbol in sdrs">
                             <img :src="`images/${sdrs[symbol].mkt}.png`" class="size-7 hover:cursor-pointer"
                               @click="window.open(urls[sdrs[symbol].mkt].replace('{CODE}',sdrs[symbol].code));show=false">
@@ -72,7 +72,7 @@
               </tr>
             </template>
             <tr>
-              <td :class="padding + 'text-sm sticky left-2'" colspan="2" x-text="totals[stockType].meta"></td>
+              <td :class="padding + 'text-sm sticky left-0'" colspan="2" x-text="totals[stockType].meta"></td>
               <td :colspan="columns.length - 5"></td>
               <td :class="padding + 'text-right'">Total:</td>
               <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
