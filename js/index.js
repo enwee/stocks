@@ -206,7 +206,7 @@ const columns = [
 
   { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
   { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
-  { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
+  // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
   { label: "Avg Px", alias: "avgPrice", type: "default", format: (num, usd) => num ? num.toFixed(2) + (usd ? currency() : "") : "-" },
 
   { label: "Mkt Val", alias: "mkt_value", type: "watched", format: (num, usd) => num ? numComma(num) + (usd ? currency("SGD") : "") : "-" },
