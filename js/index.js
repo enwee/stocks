@@ -183,7 +183,7 @@ const columns = [
 
   { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
   { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
-  { label: "Vol(000s)", alias: "vl", type: "watched", format: num => num ? numComma(num) : "-" },
+  { label: "Vol(000)", alias: "vl", type: "watched", format: num => num ? numComma(Math.round(num * 10) / 10) : "-" },
 
   {
     label: "52 week H/L", alias: "-", type: "52w",
