@@ -17,6 +17,8 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-lg: 1.125rem;
@@ -196,8 +198,8 @@
   .-right-1\.75 {
     right: calc(var(--spacing) * -1.75);
   }
-  .-right-3\.25 {
-    right: calc(var(--spacing) * -3.25);
+  .-right-3\.5 {
+    right: calc(var(--spacing) * -3.5);
   }
   .-bottom-1\.75 {
     bottom: calc(var(--spacing) * -1.75);
@@ -392,8 +394,12 @@
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
   }
-  .text-\[10px\] {
-    font-size: 10px;
+  .text-xs {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+  .text-\[8px\] {
+    font-size: 8px;
   }
   .whitespace-nowrap {
     white-space: nowrap;

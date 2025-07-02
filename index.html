@@ -72,8 +72,8 @@
               </tr>
             </template>
             <tr>
-              <td :class="padding + 'text-sm sticky left-0'" colspan="2" x-text="totals[stockType].meta"></td>
-              <td :colspan="columns.length - 5"></td>
+              <td :class="padding + 'text-sm sticky left-0'" colspan="3" x-text="totals[stockType].meta"></td>
+              <td :colspan="columns.length - 6"></td>
               <td :class="padding + 'text-right'">Total:</td>
               <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
               <td :class="padding + text" x-html="numComma(totals[stockType].gain_loss, true)"></td>
@@ -82,7 +82,7 @@
         </template>
       </table>
 
-      <div class="w-max space-x-4 flex justify-between items-center text-sm sticky left-2">
+      <div class="w-max space-x-4 flex justify-between items-center text-xs sticky left-2">
         <div class="flex flex-col justify-around">
           <div x-text="`prices (${timeDateStr(time.quotes)})`"></div>
           <div x-text="`updated ${hhmmss(time.interval-time.quotes)} ago`"></div>
@@ -91,9 +91,10 @@
           <button :class="button" @click="clearInterval(intervalId)">STOP</button>
           <button :class="button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
         </div>
-        <div class="flex flex-col justify-around text-right">
-          <div x-text="`financials (${timeDateStr(time.financials)})`"></div>
-          <div x-text="`forex (${timeDateStr(time.rates)})`"></div>
+        <div class="flex flex-col justify-around">
+          <div x-text="`(${timeDateStr(time.financials)}) financials`"></div>
+          <div x-text="`(${timeDateStr(time.rates)}) forex rates`"></div>
+          <div x-text="`(${timeDateStr(time.initial)}) page source`"></div>
         </div>
       </div>
 

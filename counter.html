@@ -16,13 +16,13 @@
     <div class="text-2xl" x-text="`${name} (${symbol})`"></div>
     <details class="py-2 w-max" open>
       <summary class="py-1 text-xl text-violet-400"
-        x-html="`Trade History (${numComma(cur.holdings)} shares @ $${cur.avgPrice.toFixed(3)}${usd?'🇺🇸':''})`">
+        x-html="`Trade History (${numComma(cur.holdings)} shares @ $${cur.avgPrice.toFixed(3)}${usd?currency():''} )`">
       </summary>
       <table>
         <thead>
           <tr>
             <template x-for="{label, addLabel} in columns">
-              <th :class="header" x-html="label+(addLabel?(usd?currency('🇺🇸'):''):'')"></th>
+              <th :class="header" x-html="label+(addLabel?(usd?currency():''):'')"></th>
             </template>
           </tr>
         </thead>

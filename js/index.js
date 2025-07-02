@@ -81,7 +81,7 @@ const getFinancials = async (referenceTime = Date.now()) => {
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
   const { ratio, currency } = sdrs[symbol]
   const v = last * ratio * rates[currency]
-  return `${currency} ${v.toFixed(2)}`
+  return `${currency} 🇭🇰 ${v.toFixed(2)}`
 }
 
 const updateDisplay = async (referenceTime = Date.now()) => {
@@ -111,9 +111,9 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1 USD = ${(1 / rates.USD).toFixed(3)} SGD`
-  totals.stocks.meta = `1 SGD = ${rates.JPY.toFixed(3)} JPY`
-  totals.monitored.meta = `10 CNY = ${((1 / rates.CNY) * 10).toFixed(3)} SGD`
+  totals.reits.meta = `1 USD 🇺🇸 = ${(1 / rates.USD).toFixed(3)} SGD 🇸🇬`
+  totals.stocks.meta = `1 SGD 🇸🇬 = ${rates.JPY.toFixed(3)} JPY 🇯🇵`
+  totals.monitored.meta = `10 CNY 🇨🇳 = ${((1 / rates.CNY) * 10).toFixed(3)} SGD 🇸🇬`
   return [stocks, rates.time, financials.time, quotesTime, totals]
 }
 
@@ -183,7 +183,7 @@ const columns = [
 
   { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
   { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
-  { label: "Vol(000)", alias: "vl", type: "watched", format: num => num ? numComma(Math.round(num * 10) / 10) : "-" },
+  // { label: "Vol(000)", alias: "vl", type: "watched", format: num => num ? numComma(Math.round(num * 10) / 10) : "-" },
 
   {
     label: "52 week H/L", alias: "-", type: "52w",
@@ -237,7 +237,7 @@ const hhmmss = millisec => {
 
 const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date(time).toDateString()
 
-const currency = (str = "USD") => `<div class='text-[10px] absolute -right-1.75 -bottom-1.75'>${str}</div>`
+const currency = (str = "USD") => `<div class='text-[8px] absolute -right-1.75 -bottom-1.75'>${str}</div>`
 
 // css classes
 const header = "p-2 text-sm text-gray-400 whitespace-nowrap"
