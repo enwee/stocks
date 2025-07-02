@@ -81,7 +81,7 @@ const getFinancials = async (referenceTime = Date.now()) => {
 const sdrInfo = ({ lt: last, nc: symbol }, rates) => {
   const { ratio, currency } = sdrs[symbol]
   const v = last * ratio * rates[currency]
-  return `${currency} 🇭🇰 ${v.toFixed(2)}`
+  return `${currency} ${flag[currency]} ${v.toFixed(2)}`
 }
 
 const updateDisplay = async (referenceTime = Date.now()) => {
@@ -111,9 +111,9 @@ const updateDisplay = async (referenceTime = Date.now()) => {
   totals.monitored.total = totals.reits.total + totals.stocks.total
   totals.monitored.gain_loss = totals.reits.gain_loss + totals.stocks.gain_loss
 
-  totals.reits.meta = `1 USD 🇺🇸 = ${(1 / rates.USD).toFixed(3)} SGD 🇸🇬`
-  totals.stocks.meta = `1 SGD 🇸🇬 = ${rates.JPY.toFixed(3)} JPY 🇯🇵`
-  totals.monitored.meta = `10 CNY 🇨🇳 = ${((1 / rates.CNY) * 10).toFixed(3)} SGD 🇸🇬`
+  totals.reits.meta = `1 USD ${flag.USD} = ${(1 / rates.USD).toFixed(3)} SGD ${flag.SGD}`
+  totals.stocks.meta = `1 SGD ${flag.SGD} = ${rates.JPY.toFixed(3)} JPY ${flag.JPY}`
+  totals.monitored.meta = `10 CNY ${flag.CNY} = ${((1 / rates.CNY) * 10).toFixed(3)} SGD ${flag.SGD}`
   return [stocks, rates.time, financials.time, quotesTime, totals]
 }
 
@@ -251,3 +251,6 @@ const color = num => num > 0 ? green : num < 0 ? red : ""
 const altBG = bool => bool ? "bg-slate-900" : "bg-stone-900"
 const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
 const blink = bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
+
+// emoji flags
+const flag = { USD: "🇺🇸", SGD: "🇸🇬", JPY: "🇯🇵", CNY: "🇨🇳", HKD: "🇭🇰" }
