@@ -169,17 +169,28 @@ const columns = [
   {
     label: "", alias: "n", type: "name", format: name => {
       const words = name.split(" ")
+      const firstWord = words[0]
+      if (firstWord.length > 9) {
+        for (let i = 7; i < firstWord.length; i++) {
+          if (firstWord[i] === firstWord[i].toUpperCase()) {
+            words.splice(0, 1, firstWord.slice(0, i), firstWord.slice(i))
+            name = words.join(" ")
+            break
+          }
+        }
+      }
+
       if (words.length > 2) {
         name = words.slice(0, 3).join(" ")
-        name = name.length > 16 ? words.slice(0, 2).join(" ") : name
+        name = name.length > 17 ? words.slice(0, 2).join(" ") : name
       }
       return name
     }
   },
 
   { label: "Last", alias: "lt", type: "watched", format: (num, usd) => num + (usd ? currency() : "") },
-  { label: "Change", alias: "c", type: "watched", format: (num, usd) => `<div class="${color(num)}">${num}</div>` + (usd ? currency() : "") },
-  { label: "%", alias: "p", type: "watched", format: num => `<div class="${color(num)}">${num.toFixed(1)}</div>` },
+  { label: "Change", alias: "c", type: "watched", format: (num, usd) => `<div class="${css.color(num)}">${num}</div>` + (usd ? currency() : "") },
+  { label: "%", alias: "p", type: "watched", format: num => `<div class="${css.color(num)}">${num.toFixed(1)}</div>` },
 
   { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
   { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
@@ -191,16 +202,16 @@ const columns = [
       if (type === "adrs") {
         return `(${sdrInfo})`
       }
-      const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 50
-      return pixel ? `<div class="w-12">${fiftyTwoWeekHigh}</div>
-      <div class="p-2">
-      <svg class="bg-violet-900" width="50" height="10" xmlns="http://www.w3.org/2000/svg">
+      const pixel = (fiftyTwoWeekHigh - fiftyTwoWeekLow) / 40
+      return pixel ? `<div class="w-10">${fiftyTwoWeekHigh}</div>
+      <div class="p-1">
+      <svg class="bg-violet-900" width="40" height="10" xmlns="http://www.w3.org/2000/svg">
       <rect class="fill-current text-violet-400" height="10"
       width="${(high - low) / pixel}" x="${(fiftyTwoWeekHigh - high) / pixel}" />
       <rect class="fill-current" width="1" height="10" x="${(fiftyTwoWeekHigh - last) / pixel}" />
       </svg>
       </div>
-      <div class="text-left w-12">${fiftyTwoWeekLow}</div>${usd ? currency() : ""}` : "-"
+      <div class="text-left w-10">${fiftyTwoWeekLow}</div>${usd ? currency() : ""}` : "-"
     }
   },
 
@@ -220,7 +231,7 @@ const links = [
   { name: "divsg", icon: "divsg.png" },
 ]
 
-const numComma = (num, colored = false) => `<div class="${color(colored ? num : 0)}">${num.toLocaleString()}</div>`
+const numComma = (num, colored = false) => `<div class="${css.color(colored ? num : 0)}">${num.toLocaleString()}</div>`
 
 const hhmmss = millisec => {
   let hr = 0, min = 0, sec = Math.floor(millisec / 1000)
@@ -237,20 +248,6 @@ const hhmmss = millisec => {
 
 const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date(time).toDateString()
 
-const currency = (str = "USD") => `<div class='text-[8px] absolute -right-1.75 -bottom-1.75'>${str}</div>`
+const currency = (str = "USD") => `<div class='text-[8px] absolute -right-1.5 -bottom-1.75'>${str}</div>`
 
-// css classes
-const header = "p-2 text-sm text-gray-400 whitespace-nowrap"
-const border = "border-b border-r border-gray-400 "
-const padding = "py-1 px-2 "
-const text = "text-gray-400 text-right "
-const base = border + padding + text
-const green = "text-emerald-500"
-const red = "text-rose-700"
-const color = num => num > 0 ? green : num < 0 ? red : ""
-const altBG = bool => bool ? "bg-slate-900" : "bg-stone-900"
-const button = "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl"
-const blink = bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
-
-// emoji flags
 const flag = { USD: "🇺🇸", SGD: "🇸🇬", JPY: "🇯🇵", CNY: "🇨🇳", HKD: "🇭🇰" }

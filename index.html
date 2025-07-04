@@ -11,6 +11,22 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
+<script>
+  const css = {
+    header: "p-2 text-sm text-gray-400 whitespace-nowrap ",
+    border: "border-b border-r border-gray-400 ",
+    padding: "py-1 pl-1 pr-2 ",
+    text: "text-gray-400 text-right ",
+    green: "text-emerald-500",
+    red: "text-rose-700",
+    altBG: bool => bool ? "bg-slate-900" : "bg-stone-900",
+    button: "bg-violet-900 hover:bg-violet-400 px-4 py-2 rounded-2xl",
+    blink: bool => bool ? "animate-(--animate-true) " : "animate-(--animate-false) "
+  }
+  css.base = css.border + css.padding + css.text
+  css.color = num => num > 0 ? css.green : num < 0 ? css.red : ""
+</script>
+
 <body class="bg-black text-white">
   <template x-data="xData" x-if="JSON.stringify(stocks) !== '{}'">
     <div class="overflow-auto h-screen px-2 space-y-4">
@@ -18,19 +34,19 @@
         <thead class="sticky top-0 z-20 bg-black shadow-[0_-0.5rem] shadow-black">
           <tr>
             <template x-for="{label} in columns">
-              <th :class="header" x-text="label"></th>
+              <th :class="css.header" x-text="label"></th>
             </template>
           </tr>
         </thead>
         <template x-for="stockType in Object.keys(display)">
           <tbody>
             <template x-for="(symbol, index) in display[stockType]">
-              <tr :class="altBG(index % 2)">
+              <tr :class="css.altBG(index % 2)">
                 <template x-for="{label,alias,type,format} in columns">
                   <div class="contents align-middle">
                     <template x-if="type==='name'">
-                      <td :class="'sticky left-0 z-10 shadow-[-0.5rem_0] shadow-black border-l '+padding+border+
-                        `${index?'':'border-t '}`+altBG(index % 2)" x-data="{show:false}">
+                      <td :class="'max-w-22 sticky left-0 z-10 shadow-[-0.5rem_0] shadow-black border-l '+css.padding+css.border+
+                        `${index?'':'border-t '}`+css.altBG(index % 2)" x-data="{show:false}">
                         <div class="h-7 flex items-center text-sm/3.5 text-violet-400 hover:cursor-pointer"
                           @click.prevent="show=true" x-text="format(stocks[symbol][alias])"></div>
                         <div x-show="show" @click.outside="show=false" x-transition
@@ -51,19 +67,19 @@
                       </td>
                     </template>
                     <template x-if="type==='52w'">
-                      <td :class="base+`${index?'':'border-t'}`">
+                      <td :class="css.base+`${index?'':'border-t'}`">
                         <div class="relative flex items-center justify-center" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                     <template x-if="type==='default'">
-                      <td :class="base+`${index?'':'border-t'}`">
+                      <td :class="css.base+`${index?'':'border-t'}`">
                         <div class="relative" x-html="format(stocks[symbol][alias],stocks[symbol].usd)"></div>
                       </td>
                     </template>
                     <template x-if="type==='watched'">
                       <td x-data="{ toggle: true }" x-init="$watch('stocks[symbol][alias]',
                         (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
-                        :class="`${base}${blink(toggle)}${index?'':'border-t'}`">
+                        :class="`${css.base}${css.blink(toggle)}${index?'':'border-t'}`">
                         <div class="relative" x-html="format(stocks[symbol][alias],stocks[symbol].usd)"></div>
                       </td>
                     </template>
@@ -72,11 +88,11 @@
               </tr>
             </template>
             <tr>
-              <td :class="padding + 'text-sm sticky left-0'" colspan="3" x-text="totals[stockType].meta"></td>
+              <td :class="css.padding + 'text-sm sticky left-0'" colspan="3" x-text="totals[stockType].meta"></td>
               <td :colspan="columns.length - 6"></td>
-              <td :class="padding + 'text-right'">Total:</td>
-              <td :class="padding + text" x-html="numComma(totals[stockType].total)"></td>
-              <td :class="padding + text" x-html="numComma(totals[stockType].gain_loss, true)"></td>
+              <td :class="css.padding + 'text-right'">Total:</td>
+              <td :class="css.padding + css.text" x-html="numComma(totals[stockType].total)"></td>
+              <td :class="css.padding + css.text" x-html="numComma(totals[stockType].gain_loss, true)"></td>
             </tr>
           </tbody>
         </template>
@@ -88,8 +104,8 @@
           <div x-text="`updated ${hhmmss(time.interval-time.quotes)} ago`"></div>
         </div>
         <div class="space-x-2">
-          <button :class="button" @click="clearInterval(intervalId)">STOP</button>
-          <button :class="button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
+          <button :class="css.button" @click="clearInterval(intervalId)">STOP</button>
+          <button :class="css.button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
         </div>
         <div class="flex flex-col justify-around">
           <div x-text="`(${timeDateStr(time.financials)}) financials`"></div>
