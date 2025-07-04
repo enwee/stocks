@@ -248,6 +248,6 @@ const hhmmss = millisec => {
 
 const timeDateStr = time => new Date(time).toLocaleTimeString() + " " + new Date(time).toDateString()
 
-const currency = (str = "USD") => `<div class='text-[8px] absolute -right-1.5 -bottom-1.75'>${str}</div>`
+const currency = (str = "USD") => `<div class='${css.cornerText}'>${str}</div>`
 
 const flag = { USD: "🇺🇸", SGD: "🇸🇬", JPY: "🇯🇵", CNY: "🇨🇳", HKD: "🇭🇰" }
