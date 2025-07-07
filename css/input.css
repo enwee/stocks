@@ -5,22 +5,38 @@
     --animate-false: false 1s ease-out;
 
     @keyframes true {
+        0% {
+            background-color: black;
+        }
+
         15% {
             background-color: white;
         }
 
         75% {
             background-color: white;
+        }
+
+        100% {
+            background-color: black;
         }
     }
 
     @keyframes false {
+        0% {
+            background-color: black;
+        }
+
         15% {
             background-color: white;
         }
 
         75% {
             background-color: white;
+        }
+
+        100% {
+            background-color: black;
         }
     }
 }

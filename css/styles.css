@@ -210,8 +210,8 @@
   .left-2 {
     left: calc(var(--spacing) * 2);
   }
-  .left-22 {
-    left: calc(var(--spacing) * 22);
+  .left-21\.5 {
+    left: calc(var(--spacing) * 21.5);
   }
   .left-36 {
     left: calc(var(--spacing) * 36);
@@ -554,19 +554,31 @@
   initial-value: 0 0 #0000;
 }
 @keyframes true {
+  0% {
+    background-color: black;
+  }
   15% {
     background-color: white;
   }
   75% {
     background-color: white;
+  }
+  100% {
+    background-color: black;
   }
 }
 @keyframes false {
+  0% {
+    background-color: black;
+  }
   15% {
     background-color: white;
   }
   75% {
     background-color: white;
+  }
+  100% {
+    background-color: black;
   }
 }
 @layer properties {

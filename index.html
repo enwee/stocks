@@ -25,7 +25,7 @@
     cornerText: "text-[8px] absolute -right-1.5 -bottom-1.75 ",
     stickyTop: "sticky top-0 z-20 bg-black shadow-[0_-0.5rem] shadow-black ",
     stickyLeft: "sticky left-0 z-10 shadow-[-0.5rem_0] shadow-black ",
-    stickyLeft2: "sticky left-22 z-10 ",
+    stickyLeft2: "sticky left-21.5 z-10 ",
     imgLink: "size-7 hover:cursor-pointer ",
   }
   css.base = css.border + css.padding + css.text
@@ -86,7 +86,7 @@
                       <td x-data="{ toggle: true }"
                         x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
                         :class="css.base+`${index?'':'border-t '}`+css.blink(toggle)+
-                          `${alias==='lt'?css.stickyLeft2+css.altBG(index % 2):''}`">
+                          `${alias==='lt'?css.stickyLeft2+css.altBG(index % 2)+'border-l ':''}`">
                         <div class="relative" x-html="format(stocks[symbol][alias],stocks[symbol].usd)"></div>
                       </td>
                     </template>
