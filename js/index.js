@@ -152,7 +152,7 @@ const xData = () => ({
       async () => {
         if (notSameday(this.time.initial, this.time.interval)) {
           // becos location.reload almost always doesnt get new from server
-          location.href = location.origin + location.pathname + `?${Date.now()}`
+          location.replace(location.origin + location.pathname + `?${Date.now()}`)
         }
         this.time.interval = Date.now()
         if (this.time.interval - this.time.quotes > 10000) {
