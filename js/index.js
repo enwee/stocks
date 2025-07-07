@@ -122,7 +122,7 @@ const xData = () => ({
   stocks: {},
   totals: {},
   time: {
-    initial: Date.now(),
+    initial: location.search.slice(1) || Date.now(),
     rates: 0,
     financials: 0,
     quotes: 0,
@@ -151,7 +151,8 @@ const xData = () => ({
     this.intervalId = setInterval(
       async () => {
         if (notSameday(this.time.initial, this.time.interval)) {
-          location.reload()
+          // becos location.reload almost always doesnt get new from server
+          location.href = location.origin + location.pathname + `?${Date.now()}`
         }
         this.time.interval = Date.now()
         if (this.time.interval - this.time.quotes > 10000) {
