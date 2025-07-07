@@ -6,7 +6,7 @@
 
     @keyframes true {
         0% {
-            background-color: black;
+            background-color: transparent;
         }
 
         15% {
@@ -18,13 +18,13 @@
         }
 
         100% {
-            background-color: black;
+            background-color: transparent;
         }
     }
 
     @keyframes false {
         0% {
-            background-color: black;
+            background-color: transparent;
         }
 
         15% {
@@ -36,7 +36,7 @@
         }
 
         100% {
-            background-color: black;
+            background-color: transparent;
         }
     }
 }

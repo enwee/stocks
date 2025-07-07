@@ -555,7 +555,7 @@
 }
 @keyframes true {
   0% {
-    background-color: black;
+    background-color: transparent;
   }
   15% {
     background-color: white;
@@ -564,12 +564,12 @@
     background-color: white;
   }
   100% {
-    background-color: black;
+    background-color: transparent;
   }
 }
 @keyframes false {
   0% {
-    background-color: black;
+    background-color: transparent;
   }
   15% {
     background-color: white;
@@ -578,7 +578,7 @@
     background-color: white;
   }
   100% {
-    background-color: black;
+    background-color: transparent;
   }
 }
 @layer properties {

@@ -59,15 +59,15 @@
                           class="absolute -top-1 left-36  p-2 flex items-center h-max w-max space-x-2 bg-violet-400 rounded">
                           <template x-if="symbol in sdrs">
                             <img :src="`images/${sdrs[symbol].mkt}.png`" :class="css.imgLink"
-                              @click="window.open(urls[sdrs[symbol].mkt].replace('{CODE}',sdrs[symbol].code));show=false">
+                              @click="open(urls[sdrs[symbol].mkt].replace('{CODE}',sdrs[symbol].code));show=false">
                           </template>
                           <template x-for="{name, icon} in links">
                             <img :src="`images/${icon}`" :class="css.imgLink"
-                              @click="window.open(urls[name].replace('{CODE}',symbol));show=false">
+                              @click="open(urls[name].replace('{CODE}',symbol).replace('{TYPE}',stocks[symbol].type));show=false">
                           </template>
                           <template x-if="symbol in portfolio">
                             <img src="images/money.png" :class="css.imgLink"
-                              @click="window.open(location.origin+`/stocks/counter.html?${symbol}`);show=false">
+                              @click="open(location.origin+`/stocks/counter.html?${symbol}`);show=false">
                           </template>
                         </div>
                       </td>
@@ -95,7 +95,8 @@
               </tr>
             </template>
             <tr>
-              <td :class="css.padding + 'text-sm sticky left-0'" colspan="3" x-text="totals[stockType].meta"></td>
+              <td :class="css.padding + 'text-sm sticky left-0 hover:cursor-pointer'" colspan="3"
+                x-text="totals[stockType].meta" @click="open(location.origin+'/stocks/forex.html')"></td>
               <td :colspan="columns.length - 6"></td>
               <td :class="css.padding + 'text-right'">Total:</td>
               <td :class="css.padding + css.text" x-html="numComma(totals[stockType].total)"></td>
