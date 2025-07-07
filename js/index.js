@@ -189,13 +189,13 @@ const columns = [
     }
   },
 
-  { label: "Last", alias: "lt", type: "watched", format: (num, usd) => num + (usd ? currency() : "") },
-  { label: "Change", alias: "c", type: "watched", format: (num, usd) => `<div class="${css.color(num)}">${num}</div>` + (usd ? currency() : "") },
-  { label: "%", alias: "p", type: "watched", format: num => `<div class="${css.color(num)}">${num.toFixed(1)}</div>` },
+  { label: "Last", alias: "lt", type: "watched", format: ({ lt: num, usd, pv }) => `<div class="${css.color(num, pv)}">${num}</div>` + (usd ? currency() : "") },
+  { label: "Change", alias: "c", type: "watched", format: ({ c: num, usd }) => `<div class="${css.color(num)}">${num}</div>` + (usd ? currency() : "") },
+  { label: "%", alias: "p", type: "watched", format: ({ p: num }) => `<div class="${css.color(num)}">${num.toFixed(1)}</div>` },
 
-  { label: "High", alias: "h", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
-  { label: "Low", alias: "l", type: "default", format: (num, usd) => num + (usd ? currency() : "") },
-  // { label: "Vol(000)", alias: "vl", type: "watched", format: num => num ? numComma(Math.round(num * 10) / 10) : "-" },
+  { label: "High", alias: "h", type: "default", format: ({ h: high, usd }) => high + (usd ? currency() : "") },
+  { label: "Low", alias: "l", type: "default", format: ({ l: low, usd }) => low + (usd ? currency() : "") },
+  // { label: "Vol(000)", alias: "vl", type: "watched", format: ({vl}) => vl ? numComma(Math.round(vl * 10) / 10) : "-" },
 
   {
     label: "52 week H/L", alias: "-", type: "52w",
@@ -216,13 +216,13 @@ const columns = [
     }
   },
 
-  { label: "P/E", alias: "peRatio", type: "default", format: num => num ? num.toFixed(2) : "-" },
-  { label: "P/B", alias: "priceBookValue", type: "default", format: num => num ? num.toFixed(2) : "-" },
-  // { label: "Shares", alias: "holdings", type: "default", format: num => num ? numComma(num) : "-" },
-  { label: "Avg Px", alias: "avgPrice", type: "default", format: (num, usd) => num ? num.toFixed(2) + (usd ? currency() : "") : "-" },
+  { label: "P/E", alias: "peRatio", type: "default", format: ({ lt: last, pv: prev, peRatio: pe }) => pe ? (last * pe / prev).toFixed(2) : "-" },
+  { label: "P/B", alias: "priceBookValue", type: "default", format: ({ lt: last, pv: prev, priceBookValue: pb }) => pb ? (last * pb / prev).toFixed(2) : "-" },
+  // { label: "Shares", alias: "holdings", type: "default", format: ({holdings:num}) => num ? numComma(num) : "-" },
+  { label: "Avg Px", alias: "avgPrice", type: "default", format: ({ avgPrice: num, usd }) => num ? num.toFixed(2) + (usd ? currency() : "") : "-" },
 
-  { label: "Mkt Val", alias: "mkt_value", type: "watched", format: (num, usd) => num ? numComma(num) + (usd ? currency("SGD") : "") : "-" },
-  { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: (num, usd) => num !== null ? numComma(num, true) + (usd ? currency("SGD") : "") : "-" },
+  { label: "Mkt Val", alias: "mkt_value", type: "watched", format: ({ mkt_value: num, usd }) => num ? numComma(num) + (usd ? currency("SGD") : "") : "-" },
+  { label: "Gain/Loss", alias: "gain_loss", type: "watched", format: ({ gain_loss: num, usd }) => num !== null ? numComma(num, true) + (usd ? currency("SGD") : "") : "-" },
 ]
 
 const links = [

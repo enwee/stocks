@@ -29,7 +29,7 @@
     imgLink: "size-7 hover:cursor-pointer ",
   }
   css.base = css.border + css.padding + css.text
-  css.color = num => num > 0 ? css.green : num < 0 ? css.red : ""
+  css.color = (num, versus = 0) => num > versus ? css.green : num < versus ? css.red : ""
 </script>
 
 <body class="bg-black text-white">
@@ -79,7 +79,7 @@
                     </template>
                     <template x-if="type==='default'">
                       <td :class="css.base+`${index?'':'border-t '}`">
-                        <div class="relative" x-html="format(stocks[symbol][alias],stocks[symbol].usd)"></div>
+                        <div class="relative" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                     <template x-if="type==='watched'">
@@ -87,7 +87,7 @@
                         x-init="$watch('stocks[symbol][alias]', (value, oldValue)=>value !== oldValue ? toggle=!toggle : null)"
                         :class="css.base+`${index?'':'border-t '}`+css.blink(toggle)+
                           `${alias==='lt'?css.stickyLeft2+css.altBG(index % 2)+'border-l ':''}`">
-                        <div class="relative" x-html="format(stocks[symbol][alias],stocks[symbol].usd)"></div>
+                        <div class="relative" x-html="format(stocks[symbol])"></div>
                       </td>
                     </template>
                   </div>
