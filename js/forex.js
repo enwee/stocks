@@ -11,7 +11,7 @@ const getRates = async (referenceTime = Date.now()) => {
         const data = await resp.json()
         for (const rate of ["USD", "JPY", "CNY", "HKD", "SGD"]) {
             rates[rate] = data.conversion_rates[rate]
-        } await getRates()
+        }
         rates.time = Date.now()
         rates.lastUpdateTime = new Date(data.time_last_update_unix * 1000).toString()
         rates.nextUpdateTime = data.time_next_update_unix * 1000
