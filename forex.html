@@ -2,19 +2,35 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>forex</title>
-    <link rel="icon" href="images/favicon.ico" />
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- <script defer src="js/forex.js"></script> -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>forex</title>
+  <link rel="icon" href="images/favicon.ico" />
+  <link rel="stylesheet" href="css/styles.css">
+  <script defer src="js/forex.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="bg-black text-white">
-    <div x-data="xData" class="p-2">
-        <input type="number" placeholder="1234 Number input WIP">
+  <div x-data="xData" class="p-2">
+    <div class="text-5xl">
+      <input class="w-40 border" type="number" x-model.number="val1">
+      <select x-model="cur1">
+        <template x-for="(flag, cur) in flags">
+          <option :value="cur" :selected="cur===cur1" x-text="flag"></option>
+        </template>
+      </select>
     </div>
+    <div class="text-5xl">
+      <input class="w-40" type="number" x-model.number="val2" x-effect="val2=await exchange($data)">
+      <select x-model="cur2">
+        <template x-for="(flag, cur) in flags">
+          <option :value="cur" :selected="cur===cur2" x-text="flag"></option>
+        </template>
+      </select>
+    </div>
+    <!-- <pre x-text="JSON.stringify($data, null, 2)"></pre> -->
+  </div>
 </body>
 
 </html>
