@@ -12,22 +12,42 @@
 </head>
 
 <body class="bg-black text-white">
-  <div x-data="xData" class="p-2">
-    <div class="text-5xl">
-      <input class="w-40 border" type="number" x-model.number="val1">
-      <select x-model="cur1">
-        <template x-for="(flag, cur) in flags">
-          <option :value="cur" :selected="cur===cur1" x-text="flag"></option>
-        </template>
-      </select>
+  <div x-data="xData" class="p-2 space-y-8">
+    <div class="p-4">
+      <div class="text-5xl">
+        <input class="px-2 w-48 border rounded-sm border-gray-600" type="number" x-model.number="val1">
+        <select x-model="cur1">
+          <template x-for="(flag, cur) in flags">
+            <option :value="cur" :selected="cur===cur1" x-text="flag"></option>
+          </template>
+        </select>
+      </div>
+      <div class="text-5xl">
+        <input class="px-2 w-48" disabled x-model="val2" x-effect="val2=await exchange(val1,cur1,cur2);save($data)">
+        <select x-model="cur2">
+          <template x-for="(flag, cur) in flags">
+            <option :value="cur" :selected="cur===cur2" x-text="flag"></option>
+          </template>
+        </select>
+      </div>
     </div>
-    <div class="text-5xl">
-      <input class="w-40" type="number" x-model.number="val2" x-effect="val2=await exchange($data)">
-      <select x-model="cur2">
-        <template x-for="(flag, cur) in flags">
-          <option :value="cur" :selected="cur===cur2" x-text="flag"></option>
-        </template>
-      </select>
+    <div class="p-4">
+      <div class="text-5xl">
+        <input class="px-2 w-48 border rounded-sm border-gray-600" type="number" x-model.number="val3">
+        <select x-model="cur3">
+          <template x-for="(flag, cur) in flags">
+            <option :value="cur" :selected="cur===cur3" x-text="flag"></option>
+          </template>
+        </select>
+      </div>
+      <div class="text-5xl">
+        <input class="px-2 w-48" disabled x-model="val4" x-effect="val4=await exchange(val3,cur3,cur4);save($data)">
+        <select x-model="cur4">
+          <template x-for="(flag, cur) in flags">
+            <option :value="cur" :selected="cur===cur4" x-text="flag"></option>
+          </template>
+        </select>
+      </div>
     </div>
     <!-- <pre x-text="JSON.stringify($data, null, 2)"></pre> -->
   </div>
