@@ -23,19 +23,21 @@ const getRates = async (referenceTime = Date.now()) => {
 
 const exchange = async (val, fromCur, toCur) => {
   const rates = await getRates()
-  const amt = val * (1 / rates[fromCur]) / (1 / rates[toCur])
-  return amt > 1000 ? Math.round(amt) : Math.round(amt * 100) / 100
+  let amt = val * (1 / rates[fromCur]) / (1 / rates[toCur])
+  amt = amt > 1000 ? Math.round(amt) : Math.round(amt * 100) / 100
+  return [amt, rates.lastUpdateTime.replace(" GMT+0800 (Singapore Standard Time)", "")]
 }
 
 const save = xData => {
   // xData is from alpinejs $data and cannot do object spread.
   const data = JSON.parse(JSON.stringify(xData)); // copy of xData
-  ["val2", "val4"].forEach(key => data[key] = null)
+  ["time", "val2", "val4"].forEach(key => data[key] = null)
   localStorage.setItem("lastForex", JSON.stringify(data))
 }
 
 
 const xData = () => get("lastForex") || ({
+  time: null,
   val1: 10,
   cur1: "CNY",
   val2: null,

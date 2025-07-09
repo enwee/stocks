@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-black text-white">
-  <div x-data="xData" class="p-2 space-y-8">
+  <div x-data="xData" class="p-2 space-y-4 w-max">
     <div class="p-4">
       <div class="text-5xl">
         <input class="px-2 w-48 border rounded-sm border-gray-600" type="number" x-model.number="val1">
@@ -23,7 +23,8 @@
         </select>
       </div>
       <div class="text-5xl">
-        <input class="px-2 w-48" disabled x-model="val2" x-effect="val2=await exchange(val1,cur1,cur2);save($data)">
+        <input class="px-2 w-48" disabled x-model="val2"
+          x-effect="[val2, time]=await exchange(val1,cur1,cur2);save($data)">
         <select x-model="cur2">
           <template x-for="(flag, cur) in flags">
             <option :value="cur" :selected="cur===cur2" x-text="flag"></option>
@@ -31,6 +32,7 @@
         </select>
       </div>
     </div>
+    <div class="text-center text-xs" x-text="time"></div>
     <div class="p-4">
       <div class="text-5xl">
         <input class="px-2 w-48 border rounded-sm border-gray-600" type="number" x-model.number="val3">
@@ -41,7 +43,8 @@
         </select>
       </div>
       <div class="text-5xl">
-        <input class="px-2 w-48" disabled x-model="val4" x-effect="val4=await exchange(val3,cur3,cur4);save($data)">
+        <input class="px-2 w-48" disabled x-model="val4"
+          x-effect="[val4, time]=await exchange(val3,cur3,cur4);save($data)">
         <select x-model="cur4">
           <template x-for="(flag, cur) in flags">
             <option :value="cur" :selected="cur===cur4" x-text="flag"></option>

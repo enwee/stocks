@@ -21,6 +21,7 @@ const updateDue = (processedTime, intervalTime) => notSameday(processedTime, int
   isWeekend(intervalTime) ? false :
     isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
       isAfter(830, intervalTime) && (intervalTime - processedTime > 80000)
+const initialTime = t => new Date(t).toString() === "Invalid Date" ? Date.now() : t
 
 
 const getQuotes = async () => {
@@ -122,7 +123,7 @@ const xData = () => ({
   stocks: {},
   totals: {},
   time: {
-    initial: location.search.slice(1) || Date.now(),
+    initial: initialTime(location.search.slice(1)),
     rates: 0,
     financials: 0,
     quotes: 0,
