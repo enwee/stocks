@@ -21,7 +21,11 @@ const updateDue = (processedTime, intervalTime) => notSameday(processedTime, int
   isWeekend(intervalTime) ? false :
     isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
       isAfter(830, intervalTime) && (intervalTime - processedTime > 80000)
-const initialTime = t => new Date(t).toString() === "Invalid Date" ? Date.now() : t
+const initialTime = () => get("lastIndex") || (() => {
+  const d = Date.now()
+  localStorage.setItem("lastIndex", JSON.stringify(d))
+  return d
+})()
 
 
 const getQuotes = async () => {
@@ -123,7 +127,7 @@ const xData = () => ({
   stocks: {},
   totals: {},
   time: {
-    initial: initialTime(location.search.slice(1)),
+    initial: initialTime,
     rates: 0,
     financials: 0,
     quotes: 0,
@@ -151,9 +155,11 @@ const xData = () => ({
     await this.updateSelf(true)
     this.intervalId = setInterval(
       async () => {
-        if (notSameday(this.time.initial, this.time.interval)) {
+        if (notSameday(this.time.initial(), this.time.interval)) {
+          const d = Date.now()
+          localStorage.setItem("lastIndex", JSON.stringify(d))
           // becos location.reload almost always doesnt get new from server
-          location.replace(location.origin + location.pathname + `?${Date.now()}`)
+          location.replace(location.origin + location.pathname + `?${d}`)
         }
         this.time.interval = Date.now()
         if (this.time.interval - this.time.quotes > 10000) {
