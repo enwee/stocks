@@ -21,11 +21,12 @@ const updateDue = (processedTime, intervalTime) => notSameday(processedTime, int
   isWeekend(intervalTime) ? false :
     isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
       isAfter(830, intervalTime) && (intervalTime - processedTime > 80000)
-const initialTime = () => get("lastIndex") || (() => {
+const dateNowAndStore = () => {
   const d = Date.now()
   localStorage.setItem("lastIndex", JSON.stringify(d))
   return d
-})()
+}
+const initialTime = newLoad => newLoad ? dateNowAndStore() : get("lastIndex")
 
 
 const getQuotes = async () => {
@@ -127,7 +128,6 @@ const xData = () => ({
   stocks: {},
   totals: {},
   time: {
-    initial: initialTime,
     rates: 0,
     financials: 0,
     quotes: 0,
@@ -137,6 +137,7 @@ const xData = () => ({
   async updateSelf(initial = false) {
     if (initial || updateDue(this.time.quotes, this.time.interval)) {
       // do not updateStocks(intervalTime) cos intervalTime === 0 for initial
+      initialTime(true)
       const [stocks, ratesTime, financialsTime, quotesTime, totals] = await updateDisplay()
       this.stocks = stocks
       this.totals = totals
@@ -155,9 +156,9 @@ const xData = () => ({
     await this.updateSelf(true)
     this.intervalId = setInterval(
       async () => {
-        if (notSameday(this.time.initial(), this.time.interval)) {
-          const d = Date.now()
-          localStorage.setItem("lastIndex", JSON.stringify(d))
+        if (notSameday(initialTime(), this.time.interval)) {
+          // if (this.time.interval - initialTime() > 5000) {
+          const d = dateNowAndStore()
           // becos location.reload almost always doesnt get new from server
           location.replace(location.origin + location.pathname + `?${d}`)
         }
