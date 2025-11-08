@@ -20,7 +20,7 @@ const xData = () => ({
   },
   setMsg(msg, clear = true) {
     this.msg = msg
-    // if (clear && !msg.startsWith("Error")) setTimeout(() => this.msg = "", 4000)
+    if (clear && !msg.startsWith("Error")) setTimeout(() => this.msg = "", 4000)
   }
 })
 

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read Text File</title>
+</head>
+
+<body>
+    <h1>Read and Display Text File</h1>
+
+    <input type="file" id="fileInput" accept=".txt">
+    <br><br>
+    <div id="fileContent">
+        <!-- Content of the text file will be displayed here -->
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function () {
+            const file = this.files[0]; // Get the selected file
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const content = e.target.result; // Get the file content
+                    document.getElementById('fileContent').textContent = content; // Display it
+                };
+
+                reader.onerror = function (e) {
+                    console.error("Error reading file:", e);
+                    document.getElementById('fileContent').textContent = "Error reading file.";
+                };
+
+                reader.readAsText(file); // Read the file as text
+            } else {
+                document.getElementById('fileContent').textContent = "No file selected.";
+            }
+        });
+    </script>
+</body>
+
+</html>
