@@ -24,8 +24,7 @@
       <button @click="location.href=location.origin+`/stocks/${page}.html`">html</button>
     </div>
     <div :style="padding">
-      <!-- <button @click="getFile">from file</button> -->
-      <input type="file" id="fileInput" accept=".json">
+      <button @click="getFile">from file</button>
       <button @click="localStorage.clear()">clear all data ⚠️⛔</button>
       <div :style="msg.startsWith('Error')?'color: red':null" x-text="msg"></div>
     </div>

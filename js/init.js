@@ -24,20 +24,6 @@ const xData = () => ({
   }
 })
 
-document.getElementById('fileInput').addEventListener('change', function () {
-  const file = this.files[0]; // Get the selected file
-
-  if (file) {
-    const reader = new FileReader();
-
-
-    reader.onload = () => handleFile(file, () => { })
-    reader.readAsText(file); // Read the file as text
-  } else {
-    document.getElementById('fileContent').textContent = "No file selected.";
-  }
-});
-
 const handleFile = (file, setMsg) => {
   setMsg(`processing [${file.name}] ...`, false)
   switch (file.type) {
