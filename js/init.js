@@ -10,7 +10,15 @@ const xData = () => ({
     const [fileHandle] = await window.showOpenFilePicker();
     const file = await fileHandle.getFile();
     reader.readAsText(file)
-    reader.onload = () => handleFile(file, this.setMsg.bind(this)) // else this in setMsg goes to window object
+    // reader.onload = () => handleFile(file, this.setMsg.bind(this)) // else this in setMsg goes to window object
+    reader.onload = function (e) {
+      const content = e.target.result; // Get the file content
+      document.getElementById('fileContent').textContent = content; // Display it
+    };
+    reader.onerror = function (e) {
+      console.error("Error reading file:", e);
+      document.getElementById('fileContent').textContent = "Error reading file.";
+    };
   },
   save() {
     localStorage.setItem(this.key.trim(), this.value)
