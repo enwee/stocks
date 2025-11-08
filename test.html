@@ -10,7 +10,7 @@
 <body>
     <h1>Read and Display Text File</h1>
 
-    <input type="file" id="fileInput" accept=".txt">
+    <input type="file" id="fileInput">
     <br><br>
     <div id="fileContent">
         <!-- Content of the text file will be displayed here -->
@@ -21,11 +21,65 @@
             const file = this.files[0]; // Get the selected file
 
             if (file) {
+                const handleJSON = rawStr => {
+                    const data = JSON.parse(rawStr)
+                    for (const key in data) {
+                        switch (key) {
+                            case "trades":
+                                handleTrades(data[key])
+                                break
+                            default:
+                                localStorage.setItem(key, JSON.stringify(data[key]))
+                        }
+                    }
+                }
+                const handleTrades = trades => {
+                    for (const [symbol, csvTrades] of Object.entries(trades)) {
+                        const { rows } = csvsToObject(csvTrades)
+                        let prevDate = "1-Jan-2000", prevHoldings = 0, prevTotalCost = 0
+                        trades[symbol] = rows.map(({ tradeDate, shares, price }) => {
+                            if (new Date(tradeDate) < new Date(prevDate)) {
+                                msg = `Error: ${symbol} prev:${prevDate} current:${tradeDate}`
+                                return {}
+                            }
+                            const tradeCost = shares ? shares * price : price
+                            const totalCost = prevTotalCost + tradeCost
+                            const holdings = prevHoldings + shares
+                            const avgPrice = holdings ? totalCost / holdings : 0
+                            prevDate = tradeDate
+                            prevHoldings = holdings
+                            prevTotalCost = totalCost
+                            return { tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost }
+                        })
+                    }
+                    localStorage.setItem("trades", JSON.stringify(trades))
+                    return msg
+                }
+
+                const csvsToObject = csvs => {
+                    const header = csvs.shift().split(",")
+                    const meta = header.pop()
+                    const rows = csvs.map(csv => {
+                        const obj = {}
+                        for (const [index, data] of csv.split(",").entries()) {
+                            obj[header[index]] = header[index].endsWith("Date") ? data : Number(data)
+                        }
+                        return obj
+                    })
+                    return { meta, rows }
+                }
+
+
+
                 const reader = new FileReader();
 
                 reader.onload = function (e) {
                     const content = e.target.result; // Get the file content
                     document.getElementById('fileContent').textContent = content; // Display it
+
+                    handleJSON(content)
+
+
                 };
 
                 reader.onerror = function (e) {
