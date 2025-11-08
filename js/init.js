@@ -31,8 +31,8 @@ document.getElementById('fileInput').addEventListener('change', function () {
     const reader = new FileReader();
 
 
-    reader.readAsText(file); // Read the file as text
     reader.onload = () => handleFile(file, () => { })
+    reader.readAsText(file); // Read the file as text
   } else {
     document.getElementById('fileContent').textContent = "No file selected.";
   }
