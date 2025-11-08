@@ -10,15 +10,7 @@ const xData = () => ({
     const [fileHandle] = await window.showOpenFilePicker();
     const file = await fileHandle.getFile();
     reader.readAsText(file)
-    // reader.onload = () => handleFile(file, this.setMsg.bind(this)) // else this in setMsg goes to window object
-    reader.onload = function (e) {
-      const content = e.target.result; // Get the file content
-      document.getElementById('fileContent').textContent = content; // Display it
-    };
-    reader.onerror = function (e) {
-      console.error("Error reading file:", e);
-      document.getElementById('fileContent').textContent = "Error reading file.";
-    };
+    reader.onload = () => handleFile(file, this.setMsg.bind(this)) // else this in setMsg goes to window object
   },
   save() {
     localStorage.setItem(this.key.trim(), this.value)
@@ -31,6 +23,20 @@ const xData = () => ({
     if (clear && !msg.startsWith("Error")) setTimeout(() => this.msg = "", 4000)
   }
 })
+
+document.getElementById('fileInput').addEventListener('change', function () {
+  const file = this.files[0]; // Get the selected file
+
+  if (file) {
+    const reader = new FileReader();
+
+
+    reader.readAsText(file); // Read the file as text
+    reader.onload = () => handleFile(file, () => { })
+  } else {
+    document.getElementById('fileContent').textContent = "No file selected.";
+  }
+});
 
 const handleFile = (file, setMsg) => {
   setMsg(`processing [${file.name}] ...`, false)

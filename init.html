@@ -24,7 +24,8 @@
       <button @click="location.href=location.origin+`/stocks/${page}.html`">html</button>
     </div>
     <div :style="padding">
-      <button @click="getFile">from file</button>
+      <!-- <button @click="getFile">from file</button> -->
+      <input type="file" id="fileInput" accept=".json">
       <button @click="localStorage.clear()">clear all data ⚠️⛔</button>
       <div :style="msg.startsWith('Error')?'color: red':null" x-text="msg"></div>
     </div>
@@ -40,12 +41,6 @@
     </div>
     <pre x-text="JSON.stringify(JSON.parse(localStorage.getItem(key)),null,2)"></pre>
   </div>
-
-  <br><br>
-  <div id="fileContent">
-    <!-- Content of the text file will be displayed here -->
-  </div>
-
 </body>
 
 </html>
