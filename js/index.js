@@ -49,7 +49,7 @@ const getRates = async (referenceTime = Date.now()) => {
     rates = { time: 0, lastUpdateTime: "", nextUpdateTime: 0 }
     const resp = await fetch(urls.rates)
     const data = await resp.json()
-    for (const rate of ["USD", "JPY", "CNY", "HKD", "SGD"]) {
+    for (const rate of ["USD", "JPY", "CNY", "HKD", "SGD", "IDR"]) {
       rates[rate] = data.conversion_rates[rate]
     }
     rates.time = Date.now()
