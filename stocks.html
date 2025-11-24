@@ -7,7 +7,7 @@
   <title>stocks</title>
   <link rel="icon" href="images/favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
-  <script defer src="js/index.js"></script>
+  <script defer src="js/stocks.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
@@ -113,7 +113,7 @@
         </div>
         <div class="space-x-2">
           <button :class="css.button" @click="clearInterval(intervalId)">STOP</button>
-          <button :class="css.button" @click="location.href=location.origin+'/stocks/init.html'">DATA</button>
+          <button :class="css.button" @click="location.href=location.origin+'/init.html'">DATA</button>
         </div>
         <div class="flex flex-col justify-around">
           <div x-text="`(${timeDateStr(time.financials)}) financials`"></div>
