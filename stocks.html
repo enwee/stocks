@@ -67,7 +67,7 @@
                           </template>
                           <template x-if="symbol in portfolio">
                             <img src="images/money.png" :class="css.imgLink"
-                              @click="open(location.origin+`/stocks/counter.html?${symbol}`);show=false">
+                              @click="open(location.origin+`/counter.html?${symbol}`);show=false">
                           </template>
                         </div>
                       </td>
@@ -96,7 +96,7 @@
             </template>
             <tr>
               <td :class="css.padding + 'text-sm sticky left-0 hover:cursor-pointer'" colspan="3"
-                x-text="totals[stockType].meta" @click="open(location.origin+'/stocks/forex.html')"></td>
+                x-text="totals[stockType].meta" @click="open(location.origin+'/forex.html')"></td>
               <td :colspan="columns.length - 6"></td>
               <td :class="css.padding + 'text-right'">Total:</td>
               <td :class="css.padding + css.text" x-html="numComma(totals[stockType].total)"></td>
