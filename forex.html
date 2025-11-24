@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-black text-white">
-  <div x-data="xData" class="p-2 space-y-4 w-max">
+  <div class="p-2 space-y-4 w-max" x-data="xData">
     <div class="p-4">
       <div class="text-5xl">
         <input class="px-2 w-48 border rounded-sm border-gray-600" type="number" x-model.number="val1">
@@ -25,6 +25,7 @@
       <div class="text-5xl">
         <input class="px-2 w-48" disabled x-model="val2"
           x-effect="[val2, time]=await exchange(val1,cur1,cur2);save($data)">
+        <!-- think of some way so that rates is not called twice; x effect does not wait for each other -->
         <select x-model="cur2">
           <template x-for="(flag, cur) in flags">
             <option :value="cur" :selected="cur===cur2" x-text="flag"></option>
@@ -45,6 +46,7 @@
       <div class="text-5xl">
         <input class="px-2 w-48" disabled x-model="val4"
           x-effect="[val4, time]=await exchange(val3,cur3,cur4);save($data)">
+        <!-- think of some way so that rates is not called twice; x effect does not wait for each other -->
         <select x-model="cur4">
           <template x-for="(flag, cur) in flags">
             <option :value="cur" :selected="cur===cur4" x-text="flag"></option>
