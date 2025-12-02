@@ -9,157 +9,157 @@ const KEY_INPUT = "keyInput"
 const DELETE_BUTTON = "deleteBtn"
 
 const handleKeyDisplay = () => {
-    const key = html(KEY_INPUT).value
-    changeText(INFO_LINE, key)
-    changeText(DISPLAY_PANE, JSON.stringify(get(key), null, 2))
+  const key = html(KEY_INPUT).value
+  changeText(INFO_LINE, key)
+  changeText(DISPLAY_PANE, JSON.stringify(get(key), null, 2))
 }
 
 const handleDelete = () => {
-    const key = html(KEY_INPUT).value
-    html(KEY_INPUT).value = ""
-    if (key !== "ALL" && get(key) === null) {
-        changeText(INFO_LINE, `[${key}] no such key to delete!`)
-    } else {
-        deleet(key)
-        const msg = key === "ALL" ? "everything deleted" : `${key} deleted`
-        changeText(INFO_LINE, msg)
-        changeText(DISPLAY_PANE, "")
-    }
+  const key = html(KEY_INPUT).value
+  html(KEY_INPUT).value = ""
+  if (key !== "ALL" && get(key) === null) {
+    changeText(INFO_LINE, `[${key}] no such key to delete!`)
+  } else {
+    deleet(key)
+    const msg = key === "ALL" ? "everything deleted" : `${key} deleted`
+    changeText(INFO_LINE, msg)
+    changeText(DISPLAY_PANE, "")
+  }
 }
 
 const reader = new FileReader()
 reader.onerror = e => {
-    console.error("Error reading file:", e);
-    changeText(INFO_LINE, "Error reading file.")
+  console.error("Error reading file:", e);
+  changeText(INFO_LINE, "Error reading file.")
 };
 
 const handleFile = e => {
-    html(KEY_INPUT).value = ""
-    const file = e.target.files[0]
-    if (file) {
-        switch (file.type) {
-            case "application/json":
-                changeText(INFO_LINE, "handling json file...")
-                reader.onload = e => {
-                    changeText(DISPLAY_PANE, e.target.result)
-                    const keys = ["urls", "sdrs", "exceptions", "display"]
-                    const data = JSON.parse(e.target.result)
-                    const saved = []
-                    for (const key of keys) {
-                        if (key in data) {
-                            save(key, data[key])
-                            saved.push(key)
-                        }
-                    }
-                    changeText(INFO_LINE, `[${saved}] saved`)
-                }
-                reader.readAsText(file)
-                break
-
-            case "text/csv":
-                changeText(INFO_LINE, "handling csv file...")
-                reader.onload = e => {
-                    changeText(DISPLAY_PANE, e.target.result)
-                }
-                reader.readAsText(file)
-                break
-
-            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                changeText(INFO_LINE, "handling xlsx file...")
-                reader.onload = e => {
-                    const workbook = XLSX.read(e.target.result)
-                    if (workbook.SheetNames.includes("Buys")) {
-                        processTrades(workbook)
-                    } else if (file.name === "dividend_dates.xlsx") {
-                        processDividends(workbook)
-                    } else {
-                        changeText(DISPLAY_PANE, `sheets:\n${workbook.SheetNames}`)
-                    }
-                }
-                reader.readAsArrayBuffer(file)
-                break
-
-            default:
-                changeText(INFO_LINE, file.type)
-                reader.onload = e => {
-                    changeText(DISPLAY_PANE, e.target.result);
-                }
-                reader.readAsText(file)
+  html(KEY_INPUT).value = ""
+  const file = e.target.files[0]
+  if (file) {
+    switch (file.type) {
+      case "application/json":
+        changeText(INFO_LINE, "handling json file...")
+        reader.onload = e => {
+          changeText(DISPLAY_PANE, e.target.result)
+          const keys = ["urls", "sdrs", "exceptions", "display"]
+          const data = JSON.parse(e.target.result)
+          const saved = []
+          for (const key of keys) {
+            if (key in data) {
+              save(key, data[key])
+              saved.push(key)
+            }
+          }
+          changeText(INFO_LINE, `[${saved}] saved`)
         }
-    } else {
-        changeText(DISPLAY_PANE, "No file selected.")
+        reader.readAsText(file)
+        break
+
+      case "text/csv":
+        changeText(INFO_LINE, "handling csv file...")
+        reader.onload = e => {
+          changeText(DISPLAY_PANE, e.target.result)
+        }
+        reader.readAsText(file)
+        break
+
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        changeText(INFO_LINE, "handling xlsx file...")
+        reader.onload = e => {
+          const workbook = XLSX.read(e.target.result)
+          if (workbook.SheetNames.includes("Buys")) {
+            processTrades(workbook)
+          } else if (file.name === "dividend_dates.xlsx") {
+            processDividends(workbook)
+          } else {
+            changeText(DISPLAY_PANE, `sheets:\n${workbook.SheetNames}`)
+          }
+        }
+        reader.readAsArrayBuffer(file)
+        break
+
+      default:
+        changeText(INFO_LINE, file.type)
+        reader.onload = e => {
+          changeText(DISPLAY_PANE, e.target.result);
+        }
+        reader.readAsText(file)
     }
+  } else {
+    changeText(DISPLAY_PANE, "No file selected.")
+  }
 }
 
 const processTrades = workbook => {
-    changeText(DISPLAY_PANE, "processing trades...")
-    const buys = XLSX.utils.sheet_to_json(workbook.Sheets["Buys"], { raw: false })
-    const allCounterTrades = {}
-    let counterTrades = []
-    let symbol = ""
-    for (const row of buys) {
-        if ("Symbol" in row) {
-            if (symbol && counterTrades.length) allCounterTrades[symbol] = counterTrades
-            symbol = row["Symbol"]
-            counterTrades = []
-        }
-        if ("Shares" in row) {
-            const shares = fixNum(row["Shares"])
-            const price = fixNum(row["Price/share"])
-            if ([shares, price].includes(NaN)) {
-                changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Buy Date"]}`)
-                return
-            }
-            const tradeCost = shares ? fixNum(shares * price) : price
-            const holdings = "Symbol" in row ? shares : counterTrades.at(-1).holdings + shares
-            const totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
-            const avgPrice = holdings ? fixNum(totalCost / holdings) : 0
-            counterTrades.push({
-                tradeDate: row["Buy Date"], shares, price, tradeCost, holdings, avgPrice, totalCost
-            })
-        }
+  changeText(DISPLAY_PANE, "processing trades...")
+  const buys = XLSX.utils.sheet_to_json(workbook.Sheets["Buys"], { raw: false })
+  const allCounterTrades = {}
+  let counterTrades = []
+  let symbol = ""
+  for (const row of buys) {
+    if ("Symbol" in row) {
+      if (symbol && counterTrades.length) allCounterTrades[symbol] = counterTrades
+      symbol = row["Symbol"]
+      counterTrades = []
     }
-    allCounterTrades[symbol] = counterTrades
-    save("trades", allCounterTrades)
-    changeText(DISPLAY_PANE, "trades processed")
+    if ("Shares" in row) {
+      const shares = fixNum(row["Shares"])
+      const price = fixNum(row["Price/share"])
+      if ([shares, price].includes(NaN)) {
+        changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Buy Date"]}`)
+        return
+      }
+      const tradeCost = shares ? fixNum(shares * price) : price
+      const holdings = "Symbol" in row ? shares : counterTrades.at(-1).holdings + shares
+      const totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
+      const avgPrice = holdings ? fixNum(totalCost / holdings) : 0
+      counterTrades.push({
+        tradeDate: row["Buy Date"], shares, price, tradeCost, holdings, avgPrice, totalCost
+      })
+    }
+  }
+  allCounterTrades[symbol] = counterTrades
+  save("trades", allCounterTrades)
+  changeText(DISPLAY_PANE, "trades processed")
 }
 
 const processDividends = workbook => {
-    changeText(DISPLAY_PANE, "processing dividends...")
-    const counters = workbook.SheetNames.slice(1)
-    const allCountersDividends = {}
-    const trades = get("trades")
-    if (!trades) {
-        changeText(DISPLAY_PANE, "cannot process dividends: no trades found!")
-        return
-    }
-    for (const counter of counters) {
-        if (counter in trades) {
-            let counterDivs = XLSX.utils.sheet_to_json(workbook.Sheets[counter], { raw: false })
-            counterDivs.forEach(row => row.Rate = Number(row.Rate))
-            const combined = trades[counter].concat(counterDivs)
-            combined.sort(sortByDate(row => "tradeDate" in row ? "tradeDate" : "Ex"))
-            counterDivs = []
-            let holdings = 0
-            for (const row of combined) {
-                if ("tradeDate" in row) {
-                    holdings = row.holdings
-                } else if (holdings !== 0) {
-                    counterDivs.push({
-                        exDate: row.Ex,
-                        payDate: row.Pay,
-                        rate: row.Rate,
-                        shares: holdings,
-                        amt: fixNum(row.Rate * holdings)
-                    })
-                }
-            }
-            allCountersDividends[counter] = counterDivs
+  changeText(DISPLAY_PANE, "processing dividends...")
+  const counters = workbook.SheetNames.slice(1)
+  const allCountersDividends = {}
+  const trades = get("trades")
+  if (!trades) {
+    changeText(DISPLAY_PANE, "cannot process dividends: no trades found!")
+    return
+  }
+  for (const counter of counters) {
+    if (counter in trades) {
+      let counterDivs = XLSX.utils.sheet_to_json(workbook.Sheets[counter], { raw: false })
+      counterDivs.forEach(row => row.Rate = Number(row.Rate))
+      const combined = trades[counter].concat(counterDivs)
+      combined.sort(sortByDate(row => "tradeDate" in row ? "tradeDate" : "Ex"))
+      counterDivs = []
+      let holdings = 0
+      for (const row of combined) {
+        if ("tradeDate" in row) {
+          holdings = row.holdings
+        } else if (holdings !== 0) {
+          counterDivs.push({
+            exDate: row.Ex,
+            payDate: row.Pay,
+            rate: row.Rate,
+            shares: holdings,
+            amt: fixNum(row.Rate * holdings)
+          })
         }
+      }
+      allCountersDividends[counter] = counterDivs
     }
-    save("dividends", allCountersDividends)
-    changeText(DISPLAY_PANE, "dividends processed")
-    // console.log(yearTotal("24", allCountersDividends))
+  }
+  save("dividends", allCountersDividends)
+  changeText(DISPLAY_PANE, "dividends processed")
+  // console.log(yearTotal("24", allCountersDividends))
 }
 
 html(FILE_INPUT).addEventListener("change", handleFile)
