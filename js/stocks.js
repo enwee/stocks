@@ -1,4 +1,3 @@
-const PATHMOD = location.host === "enwee.github.io" ? "/stocks" : ""
 // from localStorage
 const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
