@@ -22,11 +22,11 @@ const updateDue = (processedTime, intervalTime) => notSameday(processedTime, int
     isAfter(1730, intervalTime) ? !isAfter(1730, processedTime) :
       isAfter(830, intervalTime) && (intervalTime - processedTime > 80000)
 const dateNowAndStore = () => {
-  const d = Date.now()
-  localStorage.setItem("lastIndex", JSON.stringify(d))
-  return d
+  const d = new Date()
+  localStorage.setItem("lastIndex", JSON.stringify(d.toString()))
+  return d.getTime()
 }
-const initialTime = newLoad => newLoad ? dateNowAndStore() : get("lastIndex")
+const initialTime = newLoad => newLoad ? dateNowAndStore() : Date.parse(get("lastIndex"))
 
 
 const getQuotes = async () => {
@@ -44,17 +44,17 @@ const getQuotes = async () => {
 // referenceTime = Date.now() default is needed for when directly calling this from console
 const getRates = async (referenceTime = Date.now()) => {
   let rates = get("rates")
-  if (!rates || referenceTime > rates.nextUpdateTime) {
+  if (!rates || referenceTime > Date.parse(rates.nextUpdateTime)) {
     console.log(`getting rates...`)
     rates = { time: 0, lastUpdateTime: "", nextUpdateTime: 0 }
     const resp = await fetch(urls.rates)
     const data = await resp.json()
-    for (const rate of ["USD", "JPY", "CNY", "HKD", "SGD", "IDR"]) {
+    for (const rate of ["USD", "JPY", "CNY", "HKD", "SGD", "IDR", "SEK", "EUR"]) {
       rates[rate] = data.conversion_rates[rate]
     }
-    rates.time = Date.now()
+    rates.time = new Date().toString()
     rates.lastUpdateTime = new Date(data.time_last_update_unix * 1000).toString()
-    rates.nextUpdateTime = data.time_next_update_unix * 1000
+    rates.nextUpdateTime = new Date(data.time_next_update_unix * 1000).toString()
     localStorage.setItem("rates", JSON.stringify(rates))
     console.log(`rates done (${Date(rates.time)})`)
   }
@@ -65,7 +65,7 @@ const getRates = async (referenceTime = Date.now()) => {
 const getFinancials = async (referenceTime = Date.now()) => {
   let financials = get("financials")
   // need to check if financial.lastUpdatedTime is in utc or local. (23xx or +1 0700)
-  if (!financials || notSameday(financials.time, referenceTime, EIGHTHRSMILLISECS)) {
+  if (!financials || notSameday(Date.parse(financials.time), referenceTime, EIGHTHRSMILLISECS)) {
     financials = { time: 0 }
     for (const symbol of counters) {
       console.log(`getting financials ${symbol}...`)
@@ -77,9 +77,9 @@ const getFinancials = async (referenceTime = Date.now()) => {
       }
       financials[symbol] = data
     }
-    financials.time = Date.now()
+    financials.time = new Date().toString()
     localStorage.setItem("financials", JSON.stringify(financials))
-    console.log(`financials done (${Date(financials.time)})`)
+    console.log(`financials done (${financials.time})`)
   }
   return financials
 }
