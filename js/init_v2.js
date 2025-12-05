@@ -1,6 +1,7 @@
 import XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
-import { yearTotal } from "./functions.js"
-import { get, save, deleet, fixNum, sortByDate, html, changeText } from "./common.js"
+import { get, save, deleet } from "./storage.js"
+import { fixNum, sortByDate, getEl, changeText } from "./common.js"
+// import { yearTotal } from "./functions.js"
 
 const INFO_LINE = "infoLine"
 const DISPLAY_PANE = "displayPane"
@@ -8,20 +9,20 @@ const FILE_INPUT = "fileInput"
 const KEY_INPUT = "keyInput"
 const DELETE_BUTTON = "deleteBtn"
 
-const handleKeyDisplay = () => {
-  const key = html(KEY_INPUT).value
+const handleKeyInput = () => {
+  const key = getEl(KEY_INPUT).value
   changeText(INFO_LINE, key)
   changeText(DISPLAY_PANE, JSON.stringify(get(key), null, 2))
 }
 
 const handleDelete = () => {
-  const key = html(KEY_INPUT).value
-  html(KEY_INPUT).value = ""
+  const key = getEl(KEY_INPUT).value
+  getEl(KEY_INPUT).value = ""
   if (key !== "ALL" && get(key) === null) {
     changeText(INFO_LINE, `[${key}] no such key to delete!`)
-  } else {
+  } else if (confirm(`${key === "ALL" ? "EVERYTHING" : `[${key}]`} will be deleted!\nAre you sure?`)) {
     deleet(key)
-    const msg = key === "ALL" ? "everything deleted" : `${key} deleted`
+    const msg = key === "ALL" ? "EVERYTHING deleted" : `[${key}] deleted`
     changeText(INFO_LINE, msg)
     changeText(DISPLAY_PANE, "")
   }
@@ -34,7 +35,7 @@ reader.onerror = e => {
 };
 
 const handleFile = e => {
-  html(KEY_INPUT).value = ""
+  getEl(KEY_INPUT).value = ""
   const file = e.target.files[0]
   if (file) {
     switch (file.type) {
@@ -162,6 +163,6 @@ const processDividends = workbook => {
   // console.log(yearTotal("24", allCountersDividends))
 }
 
-html(FILE_INPUT).addEventListener("change", handleFile)
-html(KEY_INPUT).addEventListener("input", handleKeyDisplay)
-html(DELETE_BUTTON).addEventListener("click", handleDelete)
+getEl(FILE_INPUT).addEventListener("change", handleFile)
+getEl(KEY_INPUT).addEventListener("input", handleKeyInput)
+getEl(DELETE_BUTTON).addEventListener("click", handleDelete)
