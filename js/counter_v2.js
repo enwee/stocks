@@ -2,12 +2,12 @@ import { css, getEl, newEl, tHead, tBody, numComma, numFixed } from "./common.js
 import { getNames, getTrades } from "./storage.js"
 
 const symbol = location.search.slice(1)
-let name = ""
-if (symbol) {
-  document.title = symbol
-  name = (await getNames())[symbol]
-  getEl("counterName").textContent = `${name} (${symbol})`
-}
+if (symbol) document.title = symbol
+
+const name = (await getNames())[symbol]
+getEl("counterName").textContent = `${name} (${symbol})`
+
+const USD = name.includes("USD")
 
 const tableConfig = {
   tradeDate: {
@@ -28,7 +28,7 @@ const tableConfig = {
 
 const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
 
-const trades = getTrades()[symbol]
+const trades = getTrades(symbol)
 const cur = trades.at(-1)
 
 const tradesHeadData = Object.fromEntries(
@@ -36,7 +36,7 @@ const tradesHeadData = Object.fromEntries(
     {
       css: css.header,
       text: tableConfig[key].label,
-      append: tableConfig[key].fxLabel && name.includes("USD") && fxLabelHTML()
+      append: tableConfig[key].fxLabel && USD && fxLabelHTML()
     }])
 )
 
@@ -56,10 +56,6 @@ const thead = tHead(tradesHeadData)
 const tbody = tBody(tradesBodyData)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
-getEl("tradesSummary").textContent = `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)})`
-// append fxLabel not done
-
-
-
-
+getEl("tradesSummary").innerHTML =
+  `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 

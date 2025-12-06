@@ -13,8 +13,20 @@ if outdated
 return financials
 */
 
+const getUrls = key => {
+  const urls = get("urls")
+  return key ? urls[key] : urls
+}
 
-export const getTrades = () => get("trades")
+const useProxy = url => getUrls("proxy") + "?url=" + encodeURIComponent(url)
+
+// future might store multi portfolio display
+const getDisplay = () => get("display")
+
+export const getTrades = symbol => {
+  const trades = get("trades")
+  return symbol ? trades[symbol] : trades
+}
 export const getFinancials = async () => get("financials")
 export const getRates = async () => get("rates")
 

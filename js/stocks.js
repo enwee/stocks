@@ -37,6 +37,7 @@ const getQuotes = async () => {
     data.data.prices.filter(quote => counters.includes(quote.nc))
       .map(quote => [quote.nc, quote])
   )
+  localStorage.setItem("quotes", JSON.stringify(quotes))
   console.log(`quotes done (${Date(data.meta.processedTime)})`)
   return [quotes, data.meta.processedTime]
 }
