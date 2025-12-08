@@ -1,5 +1,5 @@
 import { css, fxLabelHTML, getEl, newEl, tHead, tBody, numComma, numFixed } from "./common.js"
-import { getQuotes, getTrades } from "./storage.js"
+import { getQuotes, getTrades, getDivs } from "./storage.js"
 
 const symbol = location.search.slice(1)
 if (symbol) document.title = symbol
@@ -11,17 +11,11 @@ const quote = (await getQuotes())[symbol]
 const USD = quote.name.includes("USD")
 
 getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("quote").innerHTML = `last: $${quote.last}${USD ? fxLabelHTML() : ""} ⟶ mkt val: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+getEl("quote").innerHTML = `last done: $${quote.last}${USD ? fxLabelHTML() : ""} ⟶ mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
 
 
-const tableConfig = {
-  tradeDate: {
-    label: "Date", format: str => { // d-m-y -> "d m 20y"
-      const dMy = str.split("-")
-      dMy[2] = "20" + dMy[2]
-      return dMy.join(" ")
-    }
-  },
+const tradesTable = {
+  tradeDate: { label: "Date", format: i => i },
   shares: { label: "Shares", format: numComma },
   price: { label: "Price", format: numFixed, fxLabel: true },
   tradeCost: { label: "Cost", format: numComma, fxLabel: true },
@@ -32,31 +26,60 @@ const tableConfig = {
 }
 
 const tradesHeadData = Object.fromEntries(
-  Object.keys(tableConfig).map(key => [key,
+  Object.keys(tradesTable).map(key => [key,
     {
       css: css.header,
-      text: tableConfig[key].label,
-      append: tableConfig[key].fxLabel && USD && fxLabelHTML()
+      text: tradesTable[key].label,
+      append: tradesTable[key].fxLabel && USD && fxLabelHTML()
     }])
 )
 
 const tradesBodyData = trades.map((trade, index) => {
   const data = {}
-  for (const key of Object.keys(tableConfig)) {
+  for (const key of Object.keys(tradesTable)) {
     data[key] = {
-      text: tableConfig[key].format(trade[key]),
+      text: tradesTable[key].format(trade[key]),
       css: css.base() + css.altBG(index % 2)
     }
   }
   return data
 })
 
-
 const thead = tHead(tradesHeadData)
 const tbody = tBody(tradesBodyData)
-
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
   `Trade History (${numComma(cur.holdings)} shares @ avg $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 
+const divsTable = {
+  payDate: { label: "Pay Date", format: i => i },
+  rate: { label: "Rate", format: i => i, fxLabel: true },
+  shares: { label: "Holdings", format: numComma },
+  amt: { label: "Amount", format: num => numComma(num, 2), fxLabel: true }
+}
+
+const divsByYear = getDivs(symbol)
+for (const divs of Object.values(divsByYear).reverse()) {
+  const divsHeadData = Object.fromEntries(
+    Object.keys(divsTable).map(key => [key,
+      {
+        css: css.header,
+        text: divsTable[key].label,
+        append: divsTable[key].fxLabel && USD && fxLabelHTML("SGD")
+      }])
+  )
+  const divsBodyData = divs.map((div, index) => {
+    const data = {}
+    for (const key of Object.keys(divsTable)) {
+      data[key] = {
+        text: divsTable[key].format(div[key]),
+        css: css.base() + css.altBG(index % 2)
+      }
+    }
+    return data
+  })
+  const thead = tHead(divsHeadData)
+  const tbody = tBody(divsBodyData)
+  getEl("rootDiv").append(newEl("table", {}, thead, tbody))
+}

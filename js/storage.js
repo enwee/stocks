@@ -15,6 +15,11 @@ export const getTrades = symbol => {
   return symbol ? trades[symbol] : trades
 }
 
+export const getDivs = symbol => {
+  const divs = get("dividends")
+  return symbol ? divs[symbol] : divs
+}
+
 export const getQuotes = async () => {
   let quotes = get("quotes")
   if (!quotes) {

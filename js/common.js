@@ -15,9 +15,9 @@ export const fixNum = num => {
   return Number(num.toFixed(4))
 }
 
-// displaying; comma-ed with no decimals, limit to 3 decimals
-export const numComma = num => Math.floor(num).toLocaleString()
-export const numFixed = num => num.toFixed(3)
+// displaying; comma-ed with no decimals, fixed default to 3 decimals
+export const numComma = (num, decimals = 0) => num.toLocaleString("en-SG", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+export const numFixed = (num, decimals = 3) => num.toFixed(decimals)
 
 export const sortByDate = dateKeyFn => (a, b) => {
   const aDate = new Date(a[dateKeyFn(a)])

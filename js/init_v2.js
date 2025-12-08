@@ -105,6 +105,7 @@ const processTrades = workbook => {
       counterTrades = []
     }
     if ("Shares" in row) {
+      const tradeDate = row["Buy Date"].replace("-", " ").replace("-", " 20")
       const shares = fixNum(row["Shares"])
       const price = fixNum(row["Price/share"])
       if ([shares, price].includes(NaN)) {
@@ -116,7 +117,7 @@ const processTrades = workbook => {
       const totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
       const avgPrice = holdings ? fixNum(totalCost / holdings) : 0
       counterTrades.push({
-        tradeDate: row["Buy Date"], shares, price, tradeCost, holdings, avgPrice, totalCost
+        tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost
       })
     }
   }
@@ -147,15 +148,24 @@ const processDividends = workbook => {
           holdings = row.holdings
         } else if (holdings !== 0) {
           counterDivs.push({
-            exDate: row.Ex,
-            payDate: row.Pay,
+            exDate: row.Ex.replace("-", " ").replace("-", " 20"),
+            payDate: row.Pay.replace("-", " ").replace("-", " 20"),
             rate: row.Rate,
             shares: holdings,
             amt: fixNum(row.Rate * holdings)
           })
         }
       }
-      allCountersDividends[counter] = counterDivs
+
+      // yes deliberate extra for loop cycle, easier to understand
+      const counterDivsByYear = {}
+      for (const div of counterDivs) {
+        const year = div.payDate.slice(-4)
+        if (year in counterDivsByYear === false) counterDivsByYear[year] = []
+        counterDivsByYear[year].push(div)
+      }
+
+      allCountersDividends[counter] = counterDivsByYear
     }
   }
   save("dividends", allCountersDividends)
