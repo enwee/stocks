@@ -33,11 +33,13 @@ const getQuotes = async () => {
   console.log('getting quotes...')
   const resp = await fetch(useProxy(urls.quotes))
   const data = await resp.json()
-  const quotes = Object.fromEntries(
-    data.data.prices.filter(quote => counters.includes(quote.nc))
-      .map(quote => [quote.nc, quote])
-  )
-  localStorage.setItem("quotes", JSON.stringify(quotes))
+  const q_temp = data.data.prices.filter(quote => counters.includes(quote.nc))
+  const quotes = Object.fromEntries(q_temp.map(quote => [quote.nc, quote])) // v1 quotes
+
+  const quotes_v2 = Object.fromEntries(q_temp.map(({ nc: code, n: name, lt: last, c: chng, p: pChng, h: high, l: low, vl: vol, pv: prev, type, trading_time }) =>
+    [code, { code, name, last, chng, pChng, high, low, vol, prev, type, trading_time }]))
+  localStorage.setItem("quotes", JSON.stringify(quotes_v2))
+
   console.log(`quotes done (${Date(data.meta.processedTime)})`)
   return [quotes, data.meta.processedTime]
 }

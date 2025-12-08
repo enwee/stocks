@@ -1,13 +1,18 @@
-import { css, getEl, newEl, tHead, tBody, numComma, numFixed } from "./common.js"
-import { getNames, getTrades } from "./storage.js"
+import { css, fxLabelHTML, getEl, newEl, tHead, tBody, numComma, numFixed } from "./common.js"
+import { getQuotes, getTrades } from "./storage.js"
 
 const symbol = location.search.slice(1)
 if (symbol) document.title = symbol
 
-const name = (await getNames())[symbol]
-getEl("counterName").textContent = `${name} (${symbol})`
+const trades = getTrades(symbol)
+const cur = trades.at(-1)
 
-const USD = name.includes("USD")
+const quote = (await getQuotes())[symbol]
+const USD = quote.name.includes("USD")
+
+getEl("counterName").textContent = `${quote.name} (${symbol})`
+getEl("quote").innerHTML = `last: $${quote.last}${USD ? fxLabelHTML() : ""} ⟶ mkt val: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+
 
 const tableConfig = {
   tradeDate: {
@@ -25,11 +30,6 @@ const tableConfig = {
   avgPrice: { label: "Avg Px", format: numFixed, fxLabel: true },
   totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
 }
-
-const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
-
-const trades = getTrades(symbol)
-const cur = trades.at(-1)
 
 const tradesHeadData = Object.fromEntries(
   Object.keys(tableConfig).map(key => [key,
@@ -55,7 +55,8 @@ const tradesBodyData = trades.map((trade, index) => {
 const thead = tHead(tradesHeadData)
 const tbody = tBody(tradesBodyData)
 
+
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
-  `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
+  `Trade History (${numComma(cur.holdings)} shares @ avg $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 

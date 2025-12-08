@@ -7,6 +7,8 @@ export const css = {
   altBG: bool => bool ? "bg-slate-900" : "bg-stone-900"
 }
 
+export const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
+
 // storing; fix comma-ed string number, limit to 4 decimals
 export const fixNum = num => {
   if (typeof (num) === "string") num = Number(num.replace(",", ""))
