@@ -158,13 +158,14 @@ const processDividends = workbook => {
       }
 
       // yes deliberate extra for loop cycle, easier to understand
-      const counterDivsByYear = {}
+      const counterDivsByYear = { total: 0 }
       for (const div of counterDivs) {
         const year = div.payDate.slice(-4)
-        if (year in counterDivsByYear === false) counterDivsByYear[year] = []
-        counterDivsByYear[year].push(div)
+        if (year in counterDivsByYear === false) counterDivsByYear[year] = { divs: [], total: 0 }
+        counterDivsByYear[year].divs.push(div)
+        counterDivsByYear[year].total += div.amt
+        counterDivsByYear.total += div.amt
       }
-
       allCountersDividends[counter] = counterDivsByYear
     }
   }

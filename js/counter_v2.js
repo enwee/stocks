@@ -1,4 +1,4 @@
-import { css, fxLabelHTML, getEl, newEl, tHead, tBody, numComma, numFixed } from "./common.js"
+import { css, fxLabelHTML, gainLossHTML, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
 import { getQuotes, getTrades, getDivs } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -10,8 +10,17 @@ const cur = trades.at(-1)
 const quote = (await getQuotes())[symbol]
 const USD = quote.name.includes("USD")
 
+const divsByYear = getDivs(symbol)
+const totalDivs = divsByYear.total
+delete divsByYear.total
+
+const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
+const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
+const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
+
 getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("quote").innerHTML = `last done: $${quote.last}${USD ? fxLabelHTML() : ""} ⟶ mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+getEl("quote").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends}`
 
 
 const tradesTable = {
@@ -50,7 +59,7 @@ const tbody = tBody(tradesBodyData)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
-  `Trade History (${numComma(cur.holdings)} shares @ avg $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
+  `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 
 const divsTable = {
   payDate: { label: "Pay Date", format: i => i },
@@ -58,9 +67,11 @@ const divsTable = {
   shares: { label: "Holdings", format: numComma },
   amt: { label: "Amount", format: num => numComma(num, 2), fxLabel: true }
 }
+// const divsFooter = [{ colspan: 2 }, {}]
 
-const divsByYear = getDivs(symbol)
-for (const divs of Object.values(divsByYear).reverse()) {
+
+for (const { divs, total } of Object.values(divsByYear).reverse()) {
+
   const divsHeadData = Object.fromEntries(
     Object.keys(divsTable).map(key => [key,
       {
@@ -73,13 +84,20 @@ for (const divs of Object.values(divsByYear).reverse()) {
     const data = {}
     for (const key of Object.keys(divsTable)) {
       data[key] = {
-        text: divsTable[key].format(div[key]),
-        css: css.base() + css.altBG(index % 2)
+        css: css.base() + css.altBG(index % 2),
+        text: divsTable[key].format(div[key])
       }
     }
     return data
   })
+  const divsFootData = {
+    1: { span: 2 },
+    2: { css: css.text + css.padding, text: "Total:" },
+    3: { css: css.text + css.padding, text: numComma(total, 2) }
+  }
   const thead = tHead(divsHeadData)
   const tbody = tBody(divsBodyData)
-  getEl("rootDiv").append(newEl("table", {}, thead, tbody))
+  const tfoot = tFoot(divsFootData)
+
+  getEl("rootDiv").append(newEl("table", {}, thead, tbody, tfoot))
 }
