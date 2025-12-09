@@ -20,7 +20,7 @@ const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${
 const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
 
 getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("quote").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends}`
+getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends}`
 
 
 const tradesTable = {
