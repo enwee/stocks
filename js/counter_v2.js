@@ -1,4 +1,4 @@
-import { css, fxLabelHTML, gainLossHTML, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
+import { css, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
 import { getQuotes, getTrades, getDivs } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -61,6 +61,8 @@ getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
   `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 
+
+
 const divsTable = {
   payDate: { label: "Pay Date", format: i => i },
   rate: { label: "Rate", format: i => i, fxLabel: true },
@@ -70,7 +72,7 @@ const divsTable = {
 // const divsFooter = [{ colspan: 2 }, {}]
 
 
-for (const { divs, total } of Object.values(divsByYear).reverse()) {
+for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
 
   const divsHeadData = Object.fromEntries(
     Object.keys(divsTable).map(key => [key,
@@ -98,6 +100,9 @@ for (const { divs, total } of Object.values(divsByYear).reverse()) {
   const thead = tHead(divsHeadData)
   const tbody = tBody(divsBodyData)
   const tfoot = tFoot(divsFootData)
+  const table = newEl("table", {}, thead, tbody, tfoot)
 
-  getEl("rootDiv").append(newEl("table", {}, thead, tbody, tfoot))
+  const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? stringToElement(fxLabelHTML("SGD")) : "", USD ? " )" : ")")
+  const details = newEl("details", { css: "py-1 w-max" }, summary, table)
+  getEl("rootDiv").append(details)
 }

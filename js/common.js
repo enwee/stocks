@@ -11,6 +11,11 @@ export const css = {
 
 export const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
 export const gainLossHTML = num => `<span class="${num > 0 ? css.green : css.red}">${num > 0 ? "+" : ""}${numComma(num)}</span>`
+export const stringToElement = htmlString => {
+  const container = document.createElement('div');
+  container.innerHTML = htmlString;
+  return container.firstChild;
+}
 
 // storing; fix comma-ed string number, limit to 4 decimals
 export const fixNum = num => {
