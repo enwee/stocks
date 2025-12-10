@@ -1,8 +1,8 @@
 // from localStorage
 const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
-const display = get("display")[get("use")]
-const counters = Object.values(display).flat()
+const display = get("display")[get("use")] // used in alpinejs html page
+const counters = [...new Set(Object.values(get("display")).map(d => Object.values(d).flat()).flat())]
 const portfolio = Object.fromEntries(Object.entries(get("trades")).map(([k, v]) => [k, v.at(-1)]))
 const sdrs = get("sdrs")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)

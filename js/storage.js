@@ -7,7 +7,9 @@ const urls = get("urls")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
 // future case for get reits/stocks?
-const getDisplay = () => get("display")[get("use")]
+const getDisplay = (all = false) => all ?
+  [...new Set(Object.values(get("display")).map(d => Object.values(d).flat()).flat())]
+  : get("display")[get("use")]
 // getStocks - add undisplayed - but note most sold are already unlisted
 
 export const getTrades = symbol => {
@@ -23,7 +25,7 @@ export const getDivs = symbol => {
 export const getQuotes = async () => {
   let quotes = get("quotes")
   if (!quotes) {
-    const counters = Object.values(getDisplay()).flat()
+    const counters = getDisplay(true)
     console.log('getting quotes...')
     const resp = await fetch(useProxy(urls.quotes))
     const data = await resp.json()
