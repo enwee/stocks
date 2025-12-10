@@ -70,6 +70,7 @@ const handleFile = e => {
           const workbook = XLSX.read(e.target.result)
           if (workbook.SheetNames.includes("Buys")) {
             processTrades(workbook)
+            save("use", file.name.slice(0, -5).slice(-4))
           } else if (file.name === "dividend_dates.xlsx") {
             processDividends(workbook)
           } else {
@@ -133,10 +134,10 @@ const processDividends = workbook => {
     return
   }
   const allCountersDividends = {}
-  for (const [counter, trades] of Object.entries(trades)) {
+  for (const [counter, counterTrades] of Object.entries(trades)) {
     let counterDivs = XLSX.utils.sheet_to_json(workbook.Sheets[counter], { raw: false })
     counterDivs.forEach(row => row.Rate = Number(row.Rate))
-    const combined = trades.concat(counterDivs)
+    const combined = counterTrades.concat(counterDivs)
     combined.sort(sortByDate(row => "tradeDate" in row ? "tradeDate" : "Ex"))
     counterDivs = []
     let holdings = 0

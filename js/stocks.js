@@ -1,7 +1,7 @@
 // from localStorage
 const get = key => JSON.parse(localStorage.getItem(key))
 const urls = get("urls")
-const display = get("display")
+const display = get("display")[get("use")]
 const counters = Object.values(display).flat()
 const portfolio = Object.fromEntries(Object.entries(get("trades")).map(([k, v]) => [k, v.at(-1)]))
 const sdrs = get("sdrs")

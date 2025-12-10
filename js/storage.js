@@ -6,8 +6,8 @@ export const deleet = key => key === "ALL" ? localStorage.clear() : localStorage
 const urls = get("urls")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
-// future might store multi portfolio display/ case for get reits/stocks?
-const getDisplay = () => get("display")
+// future case for get reits/stocks?
+const getDisplay = () => get("display")[get("use")]
 // getStocks - add undisplayed - but note most sold are already unlisted
 
 export const getTrades = symbol => {
