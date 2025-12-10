@@ -1,7 +1,6 @@
 import XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
 import { get, save, deleet } from "./storage.js"
 import { fixNum, sortByDate, getEl, changeText } from "./common.js"
-// import { yearTotal } from "./functions.js"
 
 const INFO_LINE = "infoLine"
 const DISPLAY_PANE = "displayPane"
@@ -128,50 +127,46 @@ const processTrades = workbook => {
 
 const processDividends = workbook => {
   changeText(DISPLAY_PANE, "processing dividends...")
-  const counters = workbook.SheetNames.slice(1)
-  const allCountersDividends = {}
   const trades = get("trades")
   if (!trades) {
     changeText(DISPLAY_PANE, "cannot process dividends: no trades found!")
     return
   }
-  for (const counter of counters) {
-    if (counter in trades) {
-      let counterDivs = XLSX.utils.sheet_to_json(workbook.Sheets[counter], { raw: false })
-      counterDivs.forEach(row => row.Rate = Number(row.Rate))
-      const combined = trades[counter].concat(counterDivs)
-      combined.sort(sortByDate(row => "tradeDate" in row ? "tradeDate" : "Ex"))
-      counterDivs = []
-      let holdings = 0
-      for (const row of combined) {
-        if ("tradeDate" in row) {
-          holdings = row.holdings
-        } else if (holdings !== 0) {
-          counterDivs.push({
-            exDate: row.Ex.replace("-", " ").replace("-", " 20"),
-            payDate: row.Pay.replace("-", " ").replace("-", " 20"),
-            rate: row.Rate,
-            shares: holdings,
-            amt: fixNum(row.Rate * holdings)
-          })
-        }
+  const allCountersDividends = {}
+  for (const [counter, trades] of Object.entries(trades)) {
+    let counterDivs = XLSX.utils.sheet_to_json(workbook.Sheets[counter], { raw: false })
+    counterDivs.forEach(row => row.Rate = Number(row.Rate))
+    const combined = trades.concat(counterDivs)
+    combined.sort(sortByDate(row => "tradeDate" in row ? "tradeDate" : "Ex"))
+    counterDivs = []
+    let holdings = 0
+    for (const row of combined) {
+      if ("tradeDate" in row) {
+        holdings = row.holdings
+      } else if (holdings !== 0) {
+        counterDivs.push({
+          exDate: row.Ex.replace("-", " ").replace("-", " 20"),
+          payDate: row.Pay.replace("-", " ").replace("-", " 20"),
+          rate: row.Rate,
+          shares: holdings,
+          amt: fixNum(row.Rate * holdings)
+        })
       }
-
-      // yes deliberate extra for loop cycle, easier to understand
-      const counterDivsByYear = { total: 0 }
-      for (const div of counterDivs) {
-        const year = div.payDate.slice(-4)
-        if (year in counterDivsByYear === false) counterDivsByYear[year] = { divs: [], total: 0 }
-        counterDivsByYear[year].divs.push(div)
-        counterDivsByYear[year].total += div.amt
-        counterDivsByYear.total += div.amt
-      }
-      allCountersDividends[counter] = counterDivsByYear
     }
+    // yes deliberate extra for loop cycle, easier to understand
+    const counterDivsByYear = { total: 0 }
+    for (const div of counterDivs) {
+      const year = div.payDate.slice(-4)
+      if (year in counterDivsByYear === false) counterDivsByYear[year] = { divs: [], total: 0 }
+      counterDivsByYear[year].divs.push(div)
+      counterDivsByYear[year].total += div.amt
+      counterDivsByYear.total += div.amt
+    }
+    allCountersDividends[counter] = counterDivsByYear
   }
+
   save("dividends", allCountersDividends)
   changeText(DISPLAY_PANE, "dividends processed")
-  // console.log(yearTotal("24", allCountersDividends))
 }
 
 getEl(FILE_INPUT).addEventListener("change", handleFile)
