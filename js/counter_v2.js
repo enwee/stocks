@@ -1,5 +1,5 @@
 import { css, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
-import { getQuotes, getTrades, getDivs } from "./storage.js"
+import { getQuotes, getTrades, getDivs, getTradeDivSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
 if (symbol) document.title = symbol
@@ -13,6 +13,7 @@ const USD = quote.name.includes("USD")
 const divsByYear = getDivs(symbol)
 const totalDivs = divsByYear.total
 delete divsByYear.total
+const tradeDivSync = getTradeDivSync()
 
 const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
 const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
@@ -20,7 +21,7 @@ const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${
 const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
 
 getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends}`
+getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivSync ? dividends : "(dividends out of sync)"}`
 
 
 const tradesTable = {
@@ -71,38 +72,39 @@ const divsTable = {
 }
 // const divsFooter = [{ colspan: 2 }, {}]
 
+if (tradeDivSync) {
+  for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
 
-for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
-
-  const divsHeadData = Object.fromEntries(
-    Object.keys(divsTable).map(key => [key,
-      {
-        css: css.header,
-        text: divsTable[key].label,
-        append: divsTable[key].fxLabel && USD && fxLabelHTML("SGD")
-      }])
-  )
-  const divsBodyData = divs.map((div, index) => {
-    const data = {}
-    for (const key of Object.keys(divsTable)) {
-      data[key] = {
-        css: css.base() + css.altBG(index % 2),
-        text: divsTable[key].format(div[key])
+    const divsHeadData = Object.fromEntries(
+      Object.keys(divsTable).map(key => [key,
+        {
+          css: css.header,
+          text: divsTable[key].label,
+          append: divsTable[key].fxLabel && USD && fxLabelHTML("SGD")
+        }])
+    )
+    const divsBodyData = divs.map((div, index) => {
+      const data = {}
+      for (const key of Object.keys(divsTable)) {
+        data[key] = {
+          css: css.base() + css.altBG(index % 2),
+          text: divsTable[key].format(div[key])
+        }
       }
+      return data
+    })
+    const divsFootData = {
+      1: { span: 2 },
+      2: { css: css.text + css.padding, text: "Total:" },
+      3: { css: css.text + css.padding, text: numComma(total, 2) }
     }
-    return data
-  })
-  const divsFootData = {
-    1: { span: 2 },
-    2: { css: css.text + css.padding, text: "Total:" },
-    3: { css: css.text + css.padding, text: numComma(total, 2) }
-  }
-  const thead = tHead(divsHeadData)
-  const tbody = tBody(divsBodyData)
-  const tfoot = tFoot(divsFootData)
-  const table = newEl("table", {}, thead, tbody, tfoot)
+    const thead = tHead(divsHeadData)
+    const tbody = tBody(divsBodyData)
+    const tfoot = tFoot(divsFootData)
+    const table = newEl("table", {}, thead, tbody, tfoot)
 
-  const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? stringToElement(fxLabelHTML("SGD")) : "", USD ? " )" : ")")
-  const details = newEl("details", { css: "py-1 w-max" }, summary, table)
-  getEl("rootDiv").append(details)
+    const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? stringToElement(fxLabelHTML("SGD")) : "", USD ? " )" : ")")
+    const details = newEl("details", { css: "py-1 w-max" }, summary, table)
+    getEl("rootDiv").append(details)
+  }
 }

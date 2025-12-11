@@ -22,6 +22,8 @@ export const getDivs = symbol => {
   return symbol ? divs[symbol] : divs
 }
 
+export const getTradeDivSync = () => get("use") === get("using")
+
 export const getQuotes = async () => {
   let quotes = get("quotes")
   if (!quotes) {

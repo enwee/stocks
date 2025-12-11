@@ -7,6 +7,8 @@ const DISPLAY_PANE = "displayPane"
 const FILE_INPUT = "fileInput"
 const KEY_INPUT = "keyInput"
 const DELETE_BUTTON = "deleteBtn"
+const VALUE_INPUT = "valueInput"
+const SAVE_BUTTON = "saveBtn"
 
 const handleKeyInput = () => {
   const key = getEl(KEY_INPUT).value
@@ -24,6 +26,25 @@ const handleDelete = () => {
     const msg = key === "ALL" ? "EVERYTHING deleted" : `[${key}] deleted`
     changeText(INFO_LINE, msg)
     changeText(DISPLAY_PANE, "")
+  }
+}
+
+const handleSave = () => {
+  const key = getEl(KEY_INPUT).value
+  const value = getEl(VALUE_INPUT).value
+  if (key) {
+    try {
+      const json = JSON.parse(value)
+      if (confirm(`[${key}:${value}] will be saved!\nAre you sure?`)) {
+        save(key, json)
+        getEl(VALUE_INPUT).value = ""
+        handleKeyInput()
+      }
+    } catch {
+      changeText(INFO_LINE, "not valid JSON")
+    }
+  } else {
+    changeText(INFO_LINE, "no key input")
   }
 }
 
@@ -167,9 +188,11 @@ const processDividends = workbook => {
   }
 
   save("dividends", allCountersDividends)
+  save("using", get("use"))
   changeText(DISPLAY_PANE, "dividends processed")
 }
 
 getEl(FILE_INPUT).addEventListener("change", handleFile)
 getEl(KEY_INPUT).addEventListener("input", handleKeyInput)
 getEl(DELETE_BUTTON).addEventListener("click", handleDelete)
+getEl(SAVE_BUTTON).addEventListener("click", handleSave)
