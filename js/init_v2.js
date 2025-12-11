@@ -1,14 +1,17 @@
 import XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
 import { get, save, deleet } from "./storage.js"
-import { fixNum, sortByDate, getEl, changeText } from "./common.js"
+import { PATHMOD, fixNum, sortByDate, getEl, changeText } from "./common.js"
 
-const INFO_LINE = "infoLine"
-const DISPLAY_PANE = "displayPane"
+const MAIN_BUTTON = "mainBtn"
 const FILE_INPUT = "fileInput"
 const KEY_INPUT = "keyInput"
 const DELETE_BUTTON = "deleteBtn"
 const VALUE_INPUT = "valueInput"
 const SAVE_BUTTON = "saveBtn"
+const INFO_LINE = "infoLine"
+const DISPLAY_PANE = "displayPane"
+
+const backToMain = () => location.href = location.origin + PATHMOD
 
 const handleKeyInput = () => {
   const key = getEl(KEY_INPUT).value
@@ -192,6 +195,7 @@ const processDividends = workbook => {
   changeText(DISPLAY_PANE, "dividends processed")
 }
 
+getEl(MAIN_BUTTON).addEventListener("click", backToMain)
 getEl(FILE_INPUT).addEventListener("change", handleFile)
 getEl(KEY_INPUT).addEventListener("input", handleKeyInput)
 getEl(DELETE_BUTTON).addEventListener("click", handleDelete)

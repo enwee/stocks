@@ -1,3 +1,4 @@
+export const PATHMOD = location.host === "enwee.github.io" ? "/stocks" : ""
 export const css = {
   header: "pb-2 px-2 text-gray-400 whitespace-nowrap ",
   border: "border border-gray-400 ",
