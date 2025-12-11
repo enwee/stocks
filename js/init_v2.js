@@ -188,7 +188,7 @@ const processDividends = workbook => {
   }
 
   save("dividends", allCountersDividends)
-  save("using", get("use"))
+  save("used", get("use"))
   changeText(DISPLAY_PANE, "dividends processed")
 }
 
