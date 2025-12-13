@@ -7,10 +7,13 @@ const urls = get("urls")
 const useProxy = url => urls.proxy + "?url=" + encodeURIComponent(url)
 
 // future case for get reits/stocks?
-const getDisplay = (all = false) => all ?
+export const getDisplay = (all = false) => all ?
   [...new Set(Object.values(get("display")).map(d => Object.values(d).flat()).flat())]
   : get("display")[get("use")]
-// getStocks - add undisplayed - but note most sold are already unlisted
+
+export const getUnquoted = () => get("unquoted")
+
+// getStocks getNames?- add undisplayed - but note most sold are already unlisted
 
 export const getTrades = symbol => {
   const trades = get("trades")

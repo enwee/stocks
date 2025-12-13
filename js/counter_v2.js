@@ -1,5 +1,5 @@
 import { css, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
-import { getQuotes, getTrades, getDivs, getTradeDivSync } from "./storage.js"
+import { getQuotes, getUnquoted, getTrades, getDivs, getTradeDivSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
 if (symbol) document.title = symbol
@@ -8,20 +8,27 @@ const trades = getTrades(symbol)
 const cur = trades.at(-1)
 
 const quote = (await getQuotes())[symbol]
-const USD = quote.name.includes("USD")
+const unquoted = getUnquoted()
+const name = quote?.name || unquoted[symbol]
+const USD = name.includes("USD")
 
 const divsByYear = getDivs(symbol)
 const totalDivs = divsByYear.total
 delete divsByYear.total
 const tradeDivSync = getTradeDivSync()
 
-const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
-const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
-const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
-const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
+getEl("counterName").textContent = `${name} (${symbol})`
 
-getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivSync ? dividends : "(dividends out of sync)"}`
+const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
+if (!(symbol in unquoted)) {
+  const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
+  const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+  const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
+  getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivSync ? dividends : "(dividends out of sync)"}`
+} else {
+  const profitLoss = `profit/loss: $${gainLossHTML(cur.profitLoss)}`
+  getEl("info").innerHTML = `${profitLoss} | ${tradeDivSync ? dividends : "(dividends out of sync)"}`
+}
 
 
 const tradesTable = {
@@ -59,7 +66,7 @@ const thead = tHead(tradesHeadData)
 const tbody = tBody(tradesBodyData)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
-getEl("tradesSummary").innerHTML =
+getEl("tradesSummary").innerHTML = !cur.holdings ? "Trade History (SOLD)" :
   `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
 
 

@@ -1,5 +1,5 @@
 import XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
-import { get, save, deleet } from "./storage.js"
+import { get, save, deleet, getDisplay } from "./storage.js"
 import { PATHMOD, fixNum, sortByDate, getEl, changeText } from "./common.js"
 
 const MAIN_BUTTON = "mainBtn"
@@ -119,34 +119,47 @@ const handleFile = e => {
 const processTrades = workbook => {
   changeText(DISPLAY_PANE, "processing trades...")
   const buys = XLSX.utils.sheet_to_json(workbook.Sheets["Buys"], { raw: false })
+  const sells = XLSX.utils.sheet_to_json(workbook.Sheets["Sells"], { raw: false })
+  const trades = buys.concat(sells)
   const allCounterTrades = {}
   let counterTrades = []
   let symbol = ""
-  for (const row of buys) {
-    if ("Symbol" in row) {
+  for (const row of trades) {
+    if ("Symbol" in row) { // start of new counter
       if (symbol && counterTrades.length) allCounterTrades[symbol] = counterTrades
       symbol = row["Symbol"]
       counterTrades = []
     }
     if ("Shares" in row) {
-      const tradeDate = row["Buy Date"].replace("-", " ").replace("-", " 20")
-      const shares = fixNum(row["Shares"])
+      const tradeDate = row["Date"].replace("-", " ").replace("-", " 20")
+      let shares = fixNum(row["Shares"])
       const price = fixNum(row["Price/share"])
       if ([shares, price].includes(NaN)) {
-        changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Buy Date"]}`)
+        changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Date"]}`)
         return
       }
-      const tradeCost = shares ? fixNum(shares * price) : price
+      const tradeCost = shares ? fixNum(shares * price) : price // 0 shares means capital return
       const holdings = "Symbol" in row ? shares : counterTrades.at(-1).holdings + shares
       const totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
       const avgPrice = holdings ? fixNum(totalCost / holdings) : 0
-      counterTrades.push({
-        tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost
-      })
+      const counterTrade = { tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost }
+      if (holdings === 0) { // completely sold -> total cost store as profitLoss; reset totalCost
+        counterTrade.profitLoss = -totalCost
+        counterTrade.totalCost = 0
+      }
+      counterTrades.push(counterTrade)
     }
   }
   allCounterTrades[symbol] = counterTrades
   save("trades", allCounterTrades)
+
+  const quoted = getDisplay(true)
+  const unquoted = {} // save name sting of unquoted / delisted counters
+  for (const row of sells) {
+    if ("Symbol" in row && !quoted.includes(row["Symbol"])) unquoted[row["Symbol"]] = row["Name"]
+  }
+  save("unquoted", unquoted)
+
   changeText(DISPLAY_PANE, "trades processed")
 }
 
