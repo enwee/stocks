@@ -1,5 +1,5 @@
 import { getEl, newEl, sortByDate, numComma } from "./common.js";
-import { getTradeDivSync, getDivs, getQuotes, getUnquoted } from "./storage.js";
+import { getTradeDivSync, getDivs, getQuotes } from "./storage.js";
 
 const divSyncState = getTradeDivSync()
 if (!divSyncState) {
@@ -7,7 +7,6 @@ if (!divSyncState) {
 } else {
   const annual = {}
   const quotes = await getQuotes()
-  const unquoted = getUnquoted()
   for (const [counter, divsByYear] of Object.entries(getDivs())) {
     for (const [year, { divs, total }] of Object.entries(divsByYear)) {
       if (year === "total") continue // exit this iteration only
@@ -15,7 +14,7 @@ if (!divSyncState) {
       for (const div of divs) {
         annual[year].divs.push({
           date: div.payDate,
-          name: quotes[counter]?.name || unquoted[counter],
+          name: quotes[counter].name,
           amt: div.amt,
         })
       };
