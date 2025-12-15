@@ -119,30 +119,56 @@ const handleFile = e => {
 const processTrades = workbook => {
   changeText(DISPLAY_PANE, "processing trades...")
   const buys = XLSX.utils.sheet_to_json(workbook.Sheets["Buys"], { raw: false })
+  const sells = XLSX.utils.sheet_to_json(workbook.Sheets["Sells"], { raw: false })
+  const tradeRows = sells.concat(buys) // sells before buys for stable sort
   const allCounterTrades = {}
   let counterTrades = []
   let symbol = ""
-  for (const row of buys) {
-    if ("Symbol" in row) {
+  for (const row of tradeRows) {
+    if ("Symbol" in row) { // start of counter
+      // save previous
       if (symbol && counterTrades.length) allCounterTrades[symbol] = counterTrades
+      // setup for new
       symbol = row["Symbol"]
-      counterTrades = []
+      counterTrades = symbol in allCounterTrades ? allCounterTrades[symbol] : []
     }
+    if (symbol === "IGNORE") continue
+    // normal non-SOLD -negative shares trade is dollarCostAveraged; avgPrice is recalculated
+    // SOLD -negative shares trade is selling holdings of current avgPrice; taking a profit/loss
     if ("Shares" in row) {
-      const tradeDate = row["Buy Date"].replace("-", " ").replace("-", " 20")
-      const shares = fixNum(row["Shares"])
+      const sold = "Name" in row && row["Name"].startsWith("SOLD") // "SOLD (interim)" and "SOLD"
+      const tradeDate = row["Date"].replace("-", " ").replace("-", " 20")
+      const shares = fixNum(row["Shares"]) * (sold ? -1 : 1)
       const price = fixNum(row["Price/share"])
       if ([shares, price].includes(NaN)) {
-        changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Buy Date"]}`)
+        changeText(DISPLAY_PANE, `error: NaN encountered at ${symbol} ${row["Date"]}`)
         return
       }
       const tradeCost = shares ? fixNum(shares * price) : price
       const holdings = "Symbol" in row ? shares : counterTrades.at(-1).holdings + shares
-      const totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
-      const avgPrice = holdings ? fixNum(totalCost / holdings) : 0
-      counterTrades.push({
+      let totalCost, avgPrice
+      if (!sold) { // dollar cost averaged
+        totalCost = "Symbol" in row ? tradeCost : fixNum(counterTrades.at(-1).totalCost + tradeCost)
+        avgPrice = holdings ? fixNum(totalCost / holdings) : 0
+      } else { // SOLD does not change avgPrice
+        avgPrice = counterTrades.at(-1).avgPrice
+        totalCost = fixNum(avgPrice * holdings)
+      }
+      const counterTrade = {
         tradeDate, shares, price, tradeCost, holdings, avgPrice, totalCost
-      })
+      }
+      if (sold) {
+        const profitLoss = fixNum((price - avgPrice) * (-shares))
+        const accumPL = counterTrades.at(-1).accumPL
+        counterTrade.profitLoss = profitLoss
+        counterTrade.accumPL = accumPL ? accumPL + profitLoss : profitLoss
+        if (row["Name"] === "SOLD") { // final "SOLD" vs "SOLD (interim)""
+          counterTrade.carriedOver = counterTrade.holdings
+          counterTrade.holdings = 0
+          counterTrade.profitLoss = fixNum(counterTrade.profitLoss - totalCost)
+        }
+      }
+      counterTrades.push(counterTrade)
     }
   }
   allCounterTrades[symbol] = counterTrades
