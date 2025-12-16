@@ -12,6 +12,11 @@ const getDisplay = (all = false) => all ?
   : get("display")[get("use")]
 // getStocks - add undisplayed - but note most sold are already unlisted
 
+export const getNames = symbol => {
+  const names = get("names")
+  return symbol ? names[symbol] : names
+}
+
 export const getTrades = symbol => {
   const trades = get("trades")
   return symbol ? trades[symbol] : trades
@@ -22,9 +27,9 @@ export const getDivs = symbol => {
   return symbol ? divs[symbol] : divs
 }
 
-export const getTradeDivSync = () => get("use") === get("used")
+export const getTradeDivInSync = () => get("use") === get("used")
 
-export const getQuotes = async () => {
+export const getQuotesPromise = async symbol => {
   let quotes = get("quotes")
   if (!quotes) {
     const counters = getDisplay(true)
@@ -39,11 +44,11 @@ export const getQuotes = async () => {
     localStorage.setItem("quotes", JSON.stringify(quotes))
     console.log("quotes stored")
   }
-  return quotes
+  return symbol ? quotes[symbol] : quotes
 }
 
-export const getFinancials = async () => get("financials")
-export const getRates = async () => get("rates")
+export const getFinancialsPromise = async () => get("financials")
+export const getRatesPromise = async () => get("rates")
 
 /*
 wanna make these asyn and fetch if outdated

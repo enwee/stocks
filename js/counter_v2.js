@@ -1,5 +1,5 @@
-import { css, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
-import { getQuotes, getTrades, getDivs, getTradeDivSync } from "./storage.js"
+import { classes, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
+import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
 if (symbol) document.title = symbol
@@ -7,21 +7,26 @@ if (symbol) document.title = symbol
 const trades = getTrades(symbol)
 const cur = trades.at(-1)
 
-const quote = (await getQuotes())[symbol]
-const USD = quote.name.includes("USD")
+const quote = (await getQuotesPromise())[symbol]
+const name = quote ? quote.name : getNames(symbol)
+const USD = name.includes("USD")
+getEl("counterName").textContent = `${name} (${symbol})`
 
 const divsByYear = getDivs(symbol)
 const totalDivs = divsByYear.total
 delete divsByYear.total
-const tradeDivSync = getTradeDivSync()
-
-const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
-const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
-const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
+const tradeDivInSync = getTradeDivInSync()
 const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
 
-getEl("counterName").textContent = `${quote.name} (${symbol})`
-getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivSync ? dividends : "(dividends out of sync)"}`
+if (quote) {
+  const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
+  const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
+  const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
+  getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivInSync ? dividends : "(dividends out of sync)"}`
+} else {
+  const profitLoss = trades.reduce((acc, { carriedOver, accumPL }) => carriedOver !== undefined ? acc + accumPL : acc, 0)
+  getEl("info").innerHTML = `SOLD profit/loss: $${gainLossHTML(profitLoss)} | ${tradeDivInSync ? dividends : "(dividends out of sync)"}`
+}
 
 
 const tradesTable = {
@@ -29,16 +34,17 @@ const tradesTable = {
   shares: { label: "Shares", format: numComma },
   price: { label: "Price", format: numFixed, fxLabel: true },
   tradeCost: { label: "Cost", format: numComma, fxLabel: true },
-  "": { label: "", format: () => "⟶" },
+  "⟶": { label: "", format: () => "⟶" },
   holdings: { label: "Holdings", format: numComma },
   avgPrice: { label: "Avg Px", format: numFixed, fxLabel: true },
   totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
+  profitLoss: { label: "Profit/Loss", format: num => num !== undefined ? numComma(num) : "", css: num => num > 0 ? classes.green : classes.red }
 }
 
 const tradesHeadData = Object.fromEntries(
   Object.keys(tradesTable).map(key => [key,
     {
-      css: css.header,
+      css: classes.header,
       text: tradesTable[key].label,
       append: tradesTable[key].fxLabel && USD && fxLabelHTML()
     }])
@@ -46,10 +52,11 @@ const tradesHeadData = Object.fromEntries(
 
 const tradesBodyData = trades.map((trade, index) => {
   const data = {}
-  for (const key of Object.keys(tradesTable)) {
+  for (const [key, { format, css }] of Object.entries(tradesTable)) {
+    const classList = css ? css(trade[key]) : ""
     data[key] = {
-      text: tradesTable[key].format(trade[key]),
-      css: css.base() + css.altBG(index % 2)
+      text: format(trade[key]),
+      css: classes.base() + classes.altBG(index % 2) + classList
     }
   }
   return data
@@ -72,13 +79,13 @@ const divsTable = {
 }
 // const divsFooter = [{ colspan: 2 }, {}]
 
-if (tradeDivSync) {
+if (tradeDivInSync) {
   for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
 
     const divsHeadData = Object.fromEntries(
       Object.keys(divsTable).map(key => [key,
         {
-          css: css.header,
+          css: classes.header,
           text: divsTable[key].label,
           append: divsTable[key].fxLabel && USD && fxLabelHTML("SGD")
         }])
@@ -87,7 +94,7 @@ if (tradeDivSync) {
       const data = {}
       for (const key of Object.keys(divsTable)) {
         data[key] = {
-          css: css.base() + css.altBG(index % 2),
+          css: classes.base() + classes.altBG(index % 2),
           text: divsTable[key].format(div[key])
         }
       }
@@ -95,8 +102,8 @@ if (tradeDivSync) {
     })
     const divsFootData = {
       1: { span: 2 },
-      2: { css: css.text + css.padding, text: "Total:" },
-      3: { css: css.text + css.padding, text: numComma(total, 2) }
+      2: { css: classes.text + classes.padding, text: "Total:" },
+      3: { css: classes.text + classes.padding, text: numComma(total, 2) }
     }
     const thead = tHead(divsHeadData)
     const tbody = tBody(divsBodyData)

@@ -1,17 +1,17 @@
 export const PATHMOD = location.host === "enwee.github.io" ? "/stocks" : ""
-export const css = {
+export const classes = {
   header: "pb-2 px-2 text-gray-400 whitespace-nowrap ",
   border: "border border-gray-400 ",
   padding: "py-1 px-2 ",
   text: "text-lg text-gray-400 text-right ",
   base: function () { return this.border + this.padding + this.text },
-  altBG: bool => bool ? "bg-slate-900" : "bg-stone-900",
-  green: "text-emerald-500 ",
-  red: "text-rose-700 ",
+  altBG: bool => bool ? "bg-slate-900 " : "bg-stone-900 ",
+  green: "!text-emerald-500 ",
+  red: "!text-rose-700 ",
 }
 
 export const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
-export const gainLossHTML = num => `<span class="${num > 0 ? css.green : css.red}">${num > 0 ? "+" : ""}${numComma(num)}</span>`
+export const gainLossHTML = num => `<span class="${num > 0 ? classes.green : classes.red}">${num > 0 ? "+" : ""}${numComma(num)}</span>`
 export const stringToElement = htmlString => {
   const container = document.createElement('div');
   container.innerHTML = htmlString;

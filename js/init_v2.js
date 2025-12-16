@@ -122,6 +122,7 @@ const processTrades = workbook => {
   const sells = XLSX.utils.sheet_to_json(workbook.Sheets["Sells"], { raw: false })
   const tradeRows = sells.concat(buys) // sells before buys for stable sort
   const allCounterTrades = {}
+  const names = {}
   let counterTrades = []
   let symbol = ""
   for (const row of tradeRows) {
@@ -131,6 +132,7 @@ const processTrades = workbook => {
       // setup for new
       symbol = row["Symbol"]
       counterTrades = symbol in allCounterTrades ? allCounterTrades[symbol] : []
+      if (symbol !== "IGNORE") names[symbol] = row["Name"]
     }
     if (symbol === "IGNORE") continue
     // normal non-SOLD -negative shares trade is dollarCostAveraged; avgPrice is recalculated
@@ -173,6 +175,7 @@ const processTrades = workbook => {
   }
   allCounterTrades[symbol] = counterTrades
   save("trades", allCounterTrades)
+  save("names", names)
   changeText(DISPLAY_PANE, "trades processed")
 }
 
