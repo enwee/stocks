@@ -1,4 +1,5 @@
 export const PATHMOD = location.host === "enwee.github.io" ? "/stocks" : ""
+
 export const classes = {
   header: "pb-2 px-2 text-gray-400 whitespace-nowrap ",
   border: "border border-gray-400 ",
@@ -18,15 +19,14 @@ export const stringToElement = htmlString => {
   return container.firstChild;
 }
 
-// storing; fix comma-ed string number, limit to 4 decimals
+// for storing; fix comma-ed string number, limit to 4 decimals
 export const fixNum = num => {
   if (typeof (num) === "string") num = Number(num.replace(",", ""))
   return Number(num.toFixed(4))
 }
 
-// displaying; comma-ed with no decimals, fixed default to 3 decimals
+// for display; comma-ed with default no decimals
 export const numComma = (num, decimals = 0) => num.toLocaleString("en-SG", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
-export const numFixed = (num, decimals = 3) => num.toFixed(decimals)
 
 export const sortByDate = dateKeyFn => (a, b) => {
   const aDate = new Date(a[dateKeyFn(a)])

@@ -1,4 +1,4 @@
-import { classes, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma, numFixed } from "./common.js"
+import { classes, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma } from "./common.js"
 import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -40,11 +40,11 @@ if (quote) {
 const tradesTable = {
   tradeDate: { label: "Date", format: i => i },
   shares: { label: "Shares", format: numComma },
-  price: { label: "Price", format: numFixed, fxLabel: true },
+  price: { label: "Price", format: num => numComma(num, 3), fxLabel: true },
   tradeCost: { label: "Cost", format: numComma, fxLabel: true },
   "⟶": { label: "", format: () => "⟶" },
   holdings: { label: "Holdings", format: numComma },
-  avgPrice: { label: "Avg Px", format: numFixed, fxLabel: true },
+  avgPrice: { label: "Avg Px", format: num => numComma(num, 3), fxLabel: true },
   totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
   profitLoss: { label: "Profit/Loss", format: num => num !== undefined ? numComma(num) : "", css: num => num > 0 ? classes.green : classes.red }
 }
@@ -76,7 +76,7 @@ const tbody = tBody(tradesBodyData)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
-  `Trade History (${numComma(cur.holdings)} shares @ $${numFixed(cur.avgPrice)}${USD ? fxLabelHTML() + " " : ""})`
+  `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}${USD ? fxLabelHTML() + " " : ""})`
 
 
 
