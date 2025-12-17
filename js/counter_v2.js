@@ -32,9 +32,9 @@ if (quote) {
   const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
   const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
   const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
-  getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends} | ${profitLoss}`
+  getEl("info").innerHTML = `| ${lastDone} | ${mktValue} (${gainLoss}) | ${dividends} | ${profitLoss}`
 } else {
-  getEl("info").innerHTML = `${dividends} | ${profitLoss}`
+  getEl("info").innerHTML = `| ${dividends} | ${profitLoss} |`
 }
 
 const tradesTable = {
