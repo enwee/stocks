@@ -71,12 +71,34 @@ const tRows = (rows, type = "body") => {
   return newEl("t" + type, {}, ...rows) // <thead>, <tbody>, <tfoot>
 }
 
-export const tHead = cols => {
-  return tRows([cols], "head")
+export const tHead = ({ css, cols, fxLabel }) => {
+  const { required, label } = fxLabel
+  const headData = Object.fromEntries(
+    Object.keys(cols).map(key => {
+      return [key,
+        {
+          css: css.header,
+          text: cols[key].label,
+          html: cols[key].fxLabel && required && fxLabelHTML({ inline: false, curr: label })
+        }]
+    })
+  )
+  return tRows([headData], "head")
 }
 
-export const tBody = rows => {
-  return tRows(rows)
+export const tBody = ({ css: tableCss, cols }, tableRows) => {
+  const bodyData = tableRows.map((row, index) => {
+    const data = {}
+    for (const [key, { format, css: colCss }] of Object.entries(cols)) {
+      const classList = colCss ? colCss(row[key]) : ""
+      data[key] = {
+        text: format(row[key]),
+        css: tableCss.rows + tableCss.indexed(index) + classList
+      }
+    }
+    return data
+  })
+  return tRows(bodyData)
 }
 
 export const tFoot = cols => {

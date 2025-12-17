@@ -37,42 +37,32 @@ if (quote) {
   getEl("info").innerHTML = `| ${dividends} | ${profitLoss} |`
 }
 
-const tradesTable = {
-  tradeDate: { label: "Date", format: i => i },
-  shares: { label: "Shares", format: numComma },
-  price: { label: "Price", format: num => numComma(num, 3), fxLabel: true },
-  tradeCost: { label: "Cost", format: numComma, fxLabel: true },
-  "⟶": { label: "", format: () => "⟶" },
-  holdings: { label: "Holdings", format: numComma },
-  avgPrice: { label: "Avg Px", format: num => numComma(num, 3), fxLabel: true },
-  totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
-  profitLoss: { label: "Profit/Loss", format: num => num !== undefined ? numComma(num) : "", css: num => num > 0 ? classes.green : classes.red }
-}
-if (!profitLossExists) delete tradesTable.profitLoss
-
-const tradesHeadData = Object.fromEntries(
-  Object.keys(tradesTable).map(key => [key,
-    {
-      css: classes.header,
-      text: tradesTable[key].label,
-      html: tradesTable[key].fxLabel && USD && fxLabelHTML({ inline: false })
-    }])
-)
-
-const tradesBodyData = trades.map((trade, index) => {
-  const data = {}
-  for (const [key, { format, css }] of Object.entries(tradesTable)) {
-    const classList = css ? css(trade[key]) : ""
-    data[key] = {
-      text: format(trade[key]),
-      css: classes.base() + classes.altBG(index % 2) + classList
+const tradesTableConfig = {
+  css: {
+    header: classes.header,
+    rows: classes.base(),
+    indexed: i => classes.altBG(i % 2)
+  },
+  cols: {
+    tradeDate: { label: "Date", format: i => i },
+    shares: { label: "Shares", format: numComma },
+    price: { label: "Price", format: num => numComma(num, 3), fxLabel: true },
+    tradeCost: { label: "Cost", format: numComma, fxLabel: true },
+    "⟶": { label: "", format: () => "⟶" },
+    holdings: { label: "Holdings", format: numComma },
+    avgPrice: { label: "Avg Px", format: num => numComma(num, 3), fxLabel: true },
+    totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
+    profitLoss: {
+      label: "Profit/Loss", format: num => num !== undefined ? numComma(num) : "",
+      css: num => num > 0 ? classes.green : classes.red
     }
-  }
-  return data
-})
+  },
+  fxLabel: { required: USD }
+}
+if (!profitLossExists) delete tradesTableConfig.cols.profitLoss
 
-const thead = tHead(tradesHeadData)
-const tbody = tBody(tradesBodyData)
+const thead = tHead(tradesTableConfig)
+const tbody = tBody(tradesTableConfig, trades)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
@@ -80,42 +70,31 @@ getEl("tradesSummary").innerHTML =
 
 
 
-const divsTable = {
-  payDate: { label: "Pay Date", format: i => i },
-  rate: { label: "Rate", format: i => i, fxLabel: true },
-  shares: { label: "Holdings", format: numComma },
-  amt: { label: "Amount", format: num => numComma(num, 2), fxLabel: true }
-}
-// const divsFooter = [{ colspan: 2 }, {}]
 
 if (tradeDivInSync) {
-  for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
+  const divsTableConfig = {
+    css: {
+      header: classes.header,
+      rows: classes.base(),
+      indexed: i => classes.altBG(i % 2)
+    },
+    cols: {
+      payDate: { label: "Pay Date", format: i => i },
+      rate: { label: "Rate", format: i => i, fxLabel: true },
+      shares: { label: "Holdings", format: numComma },
+      amt: { label: "Amount", format: num => numComma(num, 2), fxLabel: true }
+    },
+    fxLabel: { required: USD, label: "SGD" }
+  }
 
-    const divsHeadData = Object.fromEntries(
-      Object.keys(divsTable).map(key => [key,
-        {
-          css: classes.header,
-          text: divsTable[key].label,
-          html: divsTable[key].fxLabel && USD && fxLabelHTML({ inline: false, curr: "SGD" })
-        }])
-    )
-    const divsBodyData = divs.map((div, index) => {
-      const data = {}
-      for (const key of Object.keys(divsTable)) {
-        data[key] = {
-          css: classes.base() + classes.altBG(index % 2),
-          text: divsTable[key].format(div[key])
-        }
-      }
-      return data
-    })
+  for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
     const divsFootData = {
       1: { span: 2 },
       2: { css: classes.text + classes.padding, text: "Total:" },
       3: { css: classes.text + classes.padding, text: numComma(total, 2) }
     }
-    const thead = tHead(divsHeadData)
-    const tbody = tBody(divsBodyData)
+    const thead = tHead(divsTableConfig)
+    const tbody = tBody(divsTableConfig, divs)
     const tfoot = tFoot(divsFootData)
     const table = newEl("table", {}, thead, tbody, tfoot)
 
