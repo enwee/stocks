@@ -16,18 +16,26 @@ const divsByYear = getDivs(symbol)
 const totalDivs = divsByYear.total
 delete divsByYear.total
 const tradeDivInSync = getTradeDivInSync()
-const dividends = `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}`
+const dividends = tradeDivInSync ?
+  `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}` : "(dividends out of sync)"
+
+// not that many trade rows; ok to do extra loop for profitLoss
+let profitLossExists = false
+for (const trade of trades) {
+  if ("profitLoss" in trade) { profitLossExists = true; break }
+}
+const accumPL = profitLossExists ?
+  trades.reduce((acc, { carriedOver, accumPL }) => carriedOver !== undefined ? acc + accumPL : acc, 0) : NaN
+const profitLoss = Number.isNaN(accumPL) ? "" : `SOLD profit/loss: $${gainLossHTML(accumPL)}`
 
 if (quote) {
   const lastDone = `last done: $${quote.last}${USD ? fxLabelHTML() : ""}`
   const mktValue = `mkt value: $${numComma(cur.holdings * quote.last)}${USD ? fxLabelHTML() : ""}`
   const gainLoss = gainLossHTML((cur.holdings * quote.last) - cur.totalCost) + `${USD ? fxLabelHTML() : ""}`
-  getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${tradeDivInSync ? dividends : "(dividends out of sync)"}`
+  getEl("info").innerHTML = `${lastDone} | ${mktValue} (${gainLoss}) | ${dividends} | ${profitLoss}`
 } else {
-  const profitLoss = trades.reduce((acc, { carriedOver, accumPL }) => carriedOver !== undefined ? acc + accumPL : acc, 0)
-  getEl("info").innerHTML = `SOLD profit/loss: $${gainLossHTML(profitLoss)} | ${tradeDivInSync ? dividends : "(dividends out of sync)"}`
+  getEl("info").innerHTML = `${dividends} | ${profitLoss}`
 }
-
 
 const tradesTable = {
   tradeDate: { label: "Date", format: i => i },
@@ -40,6 +48,7 @@ const tradesTable = {
   totalCost: { label: "Total Cost", format: numComma, fxLabel: true },
   profitLoss: { label: "Profit/Loss", format: num => num !== undefined ? numComma(num) : "", css: num => num > 0 ? classes.green : classes.red }
 }
+if (!profitLossExists) delete tradesTable.profitLoss
 
 const tradesHeadData = Object.fromEntries(
   Object.keys(tradesTable).map(key => [key,
