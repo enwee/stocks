@@ -8,12 +8,17 @@ export const classes = {
   base: function () { return this.border + this.padding + this.text },
   altBG: bool => bool ? "bg-slate-900 " : "bg-stone-900 ",
   green: "!text-emerald-500 ",
-  red: "!text-rose-700 ",
+  red: "!text-rose-700 "
 }
 
-export const fxLabelHTML = (str = "USD") => `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${str}</div></span>`
+export const fxLabelHTML = (config = {}) => {
+  const { curr = "USD", inline = true } = config
+  return inline ? `<sup class="align-super text-[8px]">${curr}</sup>` :
+    `<span class='relative'><div class='text-[8px] absolute -top-1 -right-3.5'>${curr}</div></span>`
+}
+
 export const gainLossHTML = num => `<span class="${num > 0 ? classes.green : classes.red}">${num > 0 ? "+" : ""}${numComma(num)}</span>`
-export const stringToElement = htmlString => {
+export const htmlToElement = htmlString => {
   const container = document.createElement('div');
   container.innerHTML = htmlString;
   return container.firstChild;
@@ -56,9 +61,9 @@ const tRows = (rows, type = "body") => {
   const colKeys = Object.keys(rows[0])
   rows = rows.map(row => {
     const tds = colKeys.map(key => {
-      const { css, span, text, append } = row[key]
+      const { css, span, text, html } = row[key]
       const td = newEl(type === "head" ? "th" : "td", { css, span }, text)
-      if (append) td.insertAdjacentHTML("beforeend", append)
+      if (html) td.insertAdjacentHTML("beforeend", html)
       return td
     })
     return newEl("tr", {}, ...tds)

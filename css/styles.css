@@ -190,9 +190,6 @@
   .absolute {
     position: absolute;
   }
-  .fixed {
-    position: fixed;
-  }
   .relative {
     position: relative;
   }
@@ -255,6 +252,9 @@
   }
   .flex {
     display: flex;
+  }
+  .inline {
+    display: inline;
   }
   .table {
     display: table;
@@ -435,6 +435,9 @@
   }
   .align-middle {
     vertical-align: middle;
+  }
+  .align-super {
+    vertical-align: super;
   }
   .text-2xl {
     font-size: var(--text-2xl);

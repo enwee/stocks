@@ -1,4 +1,4 @@
-import { classes, fxLabelHTML, gainLossHTML, stringToElement, getEl, newEl, tHead, tBody, tFoot, numComma } from "./common.js"
+import { classes, fxLabelHTML, gainLossHTML, htmlToElement, getEl, newEl, tHead, tBody, tFoot, numComma } from "./common.js"
 import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -17,7 +17,7 @@ const totalDivs = divsByYear.total
 delete divsByYear.total
 const tradeDivInSync = getTradeDivInSync()
 const dividends = tradeDivInSync ?
-  `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML("SGD") : ""}` : "(dividends out of sync)"
+  `dividends: $${numComma(totalDivs)}${USD ? fxLabelHTML({ curr: "SGD" }) : ""}` : "(dividends out of sync)"
 
 // not that many trade rows; ok to do extra loop for profitLoss
 let profitLossExists = false
@@ -55,7 +55,7 @@ const tradesHeadData = Object.fromEntries(
     {
       css: classes.header,
       text: tradesTable[key].label,
-      append: tradesTable[key].fxLabel && USD && fxLabelHTML()
+      html: tradesTable[key].fxLabel && USD && fxLabelHTML({ inline: false })
     }])
 )
 
@@ -76,7 +76,7 @@ const tbody = tBody(tradesBodyData)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
-  `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}${USD ? fxLabelHTML() + " " : ""})`
+  `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}${USD ? fxLabelHTML() : ""})`
 
 
 
@@ -96,7 +96,7 @@ if (tradeDivInSync) {
         {
           css: classes.header,
           text: divsTable[key].label,
-          append: divsTable[key].fxLabel && USD && fxLabelHTML("SGD")
+          html: divsTable[key].fxLabel && USD && fxLabelHTML({ inline: false, curr: "SGD" })
         }])
     )
     const divsBodyData = divs.map((div, index) => {
@@ -119,7 +119,7 @@ if (tradeDivInSync) {
     const tfoot = tFoot(divsFootData)
     const table = newEl("table", {}, thead, tbody, tfoot)
 
-    const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? stringToElement(fxLabelHTML("SGD")) : "", USD ? " )" : ")")
+    const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? htmlToElement(fxLabelHTML({ curr: "SGD" })) : "", ")")
     const details = newEl("details", { css: "py-1 w-max" }, summary, table)
     getEl("rootDiv").append(details)
   }
