@@ -73,13 +73,14 @@ const tRowsEl = (rows, type = "body") => {
   return newEl("t" + type, {}, ...rows) // <thead>, <tbody>, <tfoot>
 }
 
-export const tHeadEl = ({ css, cols, fxLabel: { required, label } }) => {
+export const tHeadEl = ({ css, cols, fxLabel }) => {
+
   const headData = {}
   for (const key of Object.keys(cols)) {
     headData[key] = {
       css: css.head,
       text: cols[key].label,
-      html: cols[key].fxLabel && required && fxLabelHTML({ inline: false, curr: label })
+      html: cols[key].fxLabel && fxLabel?.required && fxLabelHTML({ inline: false, curr: fxLabel?.label })
     }
   }
   return tRowsEl([headData], "head")
