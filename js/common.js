@@ -49,10 +49,12 @@ export const changeText = (id, text) => getEl(id).textContent = text
 
 export const newEl = (tag, attributes, ...content) => {
   const el = document.createElement(tag)
-  const { id, css, span } = attributes
+  const { id, css, span, open, name } = attributes
   if (id) el.id = id
   if (css) el.classList = css
   if (span) el.colSpan = span
+  if (open) el.open = open
+  if (name) el.name = name
   if (content[0] !== undefined) el.append(...content)
   return el
 }
@@ -108,4 +110,9 @@ export const tFootEl = ({ css, foot }, data) => {
     footData[key] = td
   }
   return tRowsEl([footData], "foot")
+}
+
+export const detailsEl = (table, name, open, ...summaryNodes) => {
+  const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, ...summaryNodes)
+  return newEl("details", { css: "py-1 w-max", name, open }, summary, table)
 }

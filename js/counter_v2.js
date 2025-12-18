@@ -1,4 +1,4 @@
-import { classes, fxLabelHTML, gainLossHTML, htmlToElement, getEl, newEl, tHeadEl, tBodyEl, tFootEl, numComma } from "./common.js"
+import { classes, fxLabelHTML, gainLossHTML, htmlToElement, getEl, newEl, tHeadEl, tBodyEl, tFootEl, detailsEl, numComma } from "./common.js"
 import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -63,10 +63,12 @@ if (!profitLossExists) delete tradesTableConfig.cols.profitLoss
 
 const thead = tHeadEl(tradesTableConfig)
 const tbody = tBodyEl(tradesTableConfig, trades)
-
-getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
-getEl("tradesSummary").innerHTML =
-  `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}${USD ? fxLabelHTML() : ""})`
+const table = newEl("table", {}, thead, tbody)
+const details = detailsEl(table, "", false, // table, name, open
+  `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}`,
+  USD ? htmlToElement(fxLabelHTML()) : "",
+  ")")
+getEl("rootDiv").append(details)
 
 if (tradeDivInSync) {
   const divsTableConfig = {
@@ -90,14 +92,15 @@ if (tradeDivInSync) {
     }
   }
 
-  for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
+  for (const [index, [year, { divs, total }]] of Object.entries(divsByYear).reverse().entries()) {
     const thead = tHeadEl(divsTableConfig)
     const tbody = tBodyEl(divsTableConfig, divs)
     const tfoot = tFootEl(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
-
-    const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? htmlToElement(fxLabelHTML({ curr: "SGD" })) : "", ")")
-    const details = newEl("details", { css: "py-1 w-max" }, summary, table)
+    const details = detailsEl(table, symbol, index === 0, // table, name, open
+      `${year} Dividends ($${numComma(total)}`,
+      USD ? htmlToElement(fxLabelHTML({ curr: "SGD" })) : "",
+      ")")
     getEl("rootDiv").append(details)
   }
 }
