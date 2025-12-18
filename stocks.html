@@ -74,7 +74,7 @@
                           </template>
                           <template x-if="symbol in portfolio">
                             <img src="images/money.png" :class="css.imgLink"
-                              @click="open(location.origin+PATHMOD+`/counter_v2.html?${symbol}`);show=false">
+                              @click="open(location.origin+PATHMOD+`/counter.html?${symbol}`);show=false">
                           </template>
                         </div>
                       </td>
@@ -120,7 +120,7 @@
         </div>
         <div class="space-x-2">
           <button :class="css.button" @click="clearInterval(intervalId)">STOP</button>
-          <button :class="css.button" @click="location.href=location.origin+PATHMOD+'/init_v2.html'">DATA</button>
+          <button :class="css.button" @click="location.href=location.origin+PATHMOD+'/init.html'">DATA</button>
         </div>
         <div class="flex flex-col justify-around">
           <div x-text="`(${timeDateStr(time.financials)}) financials`"></div>
