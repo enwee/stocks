@@ -1,4 +1,4 @@
-import { classes, fxLabelHTML, gainLossHTML, htmlToElement, getEl, newEl, tHead, tBody, tFoot, numComma } from "./common.js"
+import { classes, fxLabelHTML, gainLossHTML, htmlToElement, getEl, newEl, tHeadEl, tBodyEl, tFootEl, numComma } from "./common.js"
 import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 
 const symbol = location.search.slice(1)
@@ -61,8 +61,8 @@ const tradesTableConfig = {
 }
 if (!profitLossExists) delete tradesTableConfig.cols.profitLoss
 
-const thead = tHead(tradesTableConfig)
-const tbody = tBody(tradesTableConfig, trades)
+const thead = tHeadEl(tradesTableConfig)
+const tbody = tBodyEl(tradesTableConfig, trades)
 
 getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
@@ -91,9 +91,9 @@ if (tradeDivInSync) {
   }
 
   for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
-    const thead = tHead(divsTableConfig)
-    const tbody = tBody(divsTableConfig, divs)
-    const tfoot = tFoot(divsTableConfig, { 3: total })
+    const thead = tHeadEl(divsTableConfig)
+    const tbody = tBodyEl(divsTableConfig, divs)
+    const tfoot = tFootEl(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
 
     const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? htmlToElement(fxLabelHTML({ curr: "SGD" })) : "", ")")

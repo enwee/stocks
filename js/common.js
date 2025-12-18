@@ -57,7 +57,7 @@ export const newEl = (tag, attributes, ...content) => {
   return el
 }
 
-const tRows = (rows, type = "body") => {
+const tRowsEl = (rows, type = "body") => {
   const colKeys = Object.keys(rows[0])
   rows = rows.map(row => {
     const tds = colKeys.map(key => {
@@ -71,19 +71,19 @@ const tRows = (rows, type = "body") => {
   return newEl("t" + type, {}, ...rows) // <thead>, <tbody>, <tfoot>
 }
 
-export const tHead = ({ css, cols, fxLabel: { required, label } }) => {
+export const tHeadEl = ({ css, cols, fxLabel: { required, label } }) => {
   const headData = {}
-  for (const [key, { label, fxLabel }] of Object.entries(cols)) {
+  for (const key of Object.keys(cols)) {
     headData[key] = {
       css: css.head,
       text: cols[key].label,
       html: cols[key].fxLabel && required && fxLabelHTML({ inline: false, curr: label })
     }
   }
-  return tRows([headData], "head")
+  return tRowsEl([headData], "head")
 }
 
-export const tBody = ({ css, cols }, tableRows) => {
+export const tBodyEl = ({ css, cols }, tableRows) => {
   const bodyData = tableRows.map((row, index) => {
     const data = {}
     for (const [key, { format, css: colCss }] of Object.entries(cols)) {
@@ -95,10 +95,10 @@ export const tBody = ({ css, cols }, tableRows) => {
     }
     return data
   })
-  return tRows(bodyData)
+  return tRowsEl(bodyData)
 }
 
-export const tFoot = ({ css, foot }, data) => {
+export const tFootEl = ({ css, foot }, data) => {
   const footData = {}
   for (const [key, { span, text, format }] of Object.entries(foot)) {
     const td = { css: css.foot }
@@ -107,5 +107,5 @@ export const tFoot = ({ css, foot }, data) => {
     if (format) td.text = format(data[key])
     footData[key] = td
   }
-  return tRows([footData], "foot")
+  return tRowsEl([footData], "foot")
 }
