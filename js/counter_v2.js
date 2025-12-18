@@ -39,7 +39,7 @@ if (quote) {
 
 const tradesTableConfig = {
   css: {
-    header: classes.header,
+    head: classes.header,
     rows: classes.base(),
     indexed: i => classes.altBG(i % 2)
   },
@@ -68,15 +68,13 @@ getEl("tradesHistory").append(newEl("table", {}, thead, tbody))
 getEl("tradesSummary").innerHTML =
   `Trade History (${numComma(cur.holdings)} shares @ $${numComma(cur.avgPrice, 3)}${USD ? fxLabelHTML() : ""})`
 
-
-
-
 if (tradeDivInSync) {
   const divsTableConfig = {
     css: {
-      header: classes.header,
+      head: classes.header,
       rows: classes.base(),
-      indexed: i => classes.altBG(i % 2)
+      indexed: i => classes.altBG(i % 2),
+      foot: classes.text + classes.padding
     },
     cols: {
       payDate: { label: "Pay Date", format: i => i },
@@ -84,18 +82,18 @@ if (tradeDivInSync) {
       shares: { label: "Holdings", format: numComma },
       amt: { label: "Amount", format: num => numComma(num, 2), fxLabel: true }
     },
-    fxLabel: { required: USD, label: "SGD" }
+    fxLabel: { required: USD, label: "SGD" },
+    foot: {
+      1: { span: 2 },
+      2: { text: "Total:" },
+      3: { format: num => numComma(num, 2) }
+    }
   }
 
   for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
-    const divsFootData = {
-      1: { span: 2 },
-      2: { css: classes.text + classes.padding, text: "Total:" },
-      3: { css: classes.text + classes.padding, text: numComma(total, 2) }
-    }
     const thead = tHead(divsTableConfig)
     const tbody = tBody(divsTableConfig, divs)
-    const tfoot = tFoot(divsFootData)
+    const tfoot = tFoot(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
 
     const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, `${year} Dividends ($${numComma(total)}`, USD ? htmlToElement(fxLabelHTML({ curr: "SGD" })) : "", ")")

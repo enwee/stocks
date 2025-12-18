@@ -71,29 +71,26 @@ const tRows = (rows, type = "body") => {
   return newEl("t" + type, {}, ...rows) // <thead>, <tbody>, <tfoot>
 }
 
-export const tHead = ({ css, cols, fxLabel }) => {
-  const { required, label } = fxLabel
-  const headData = Object.fromEntries(
-    Object.keys(cols).map(key => {
-      return [key,
-        {
-          css: css.header,
-          text: cols[key].label,
-          html: cols[key].fxLabel && required && fxLabelHTML({ inline: false, curr: label })
-        }]
-    })
-  )
+export const tHead = ({ css, cols, fxLabel: { required, label } }) => {
+  const headData = {}
+  for (const [key, { label, fxLabel }] of Object.entries(cols)) {
+    headData[key] = {
+      css: css.head,
+      text: cols[key].label,
+      html: cols[key].fxLabel && required && fxLabelHTML({ inline: false, curr: label })
+    }
+  }
   return tRows([headData], "head")
 }
 
-export const tBody = ({ css: tableCss, cols }, tableRows) => {
+export const tBody = ({ css, cols }, tableRows) => {
   const bodyData = tableRows.map((row, index) => {
     const data = {}
     for (const [key, { format, css: colCss }] of Object.entries(cols)) {
-      const classList = colCss ? colCss(row[key]) : ""
+      const addnCss = colCss ? colCss(row[key]) : ""
       data[key] = {
         text: format(row[key]),
-        css: tableCss.rows + tableCss.indexed(index) + classList
+        css: css.rows + css.indexed(index) + addnCss
       }
     }
     return data
@@ -101,6 +98,14 @@ export const tBody = ({ css: tableCss, cols }, tableRows) => {
   return tRows(bodyData)
 }
 
-export const tFoot = cols => {
-  return tRows([cols], "foot")
+export const tFoot = ({ css, foot }, data) => {
+  const footData = {}
+  for (const [key, { span, text, format }] of Object.entries(foot)) {
+    const td = { css: css.foot }
+    if (span) td.span = span
+    if (text) td.text = text
+    if (format) td.text = format(data[key])
+    footData[key] = td
+  }
+  return tRows([footData], "foot")
 }
