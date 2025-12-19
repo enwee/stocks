@@ -1,6 +1,7 @@
 import XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
+import { PATHMOD, fixNum, sortByDate } from "./common.js"
 import { get, save, deleet } from "./storage.js"
-import { PATHMOD, fixNum, sortByDate, getEl, changeText } from "./common.js"
+import { getEl, changeText } from "./htmlEls.js"
 
 const MAIN_BUTTON = "mainBtn"
 const FILE_INPUT = "fileInput"

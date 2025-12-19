@@ -31,7 +31,7 @@ export const getTradeDivInSync = () => get("use") === get("used")
 
 export const getQuotesPromise = async symbol => {
   let quotes = get("quotes")
-  if (!quotes) {
+  if (!quotes) { // or quotes time outdated, outdated conditions, must store time
     const counters = getDisplay(true)
     console.log('getting quotes...')
     const resp = await fetch(useProxy(urls.quotes))

@@ -1,5 +1,6 @@
-import { getEl, newEl, tHeadEl, tBodyEl, tFootEl, detailsEl, sortByDate, numComma, classes } from "./common.js";
+import { sortByDate, numComma, classes } from "./common.js";
 import { getTradeDivInSync, getDivs, getQuotesPromise, getNames } from "./storage.js";
+import { getEl, newEl, tHeadEl, tBodyEl, tFootEl, detailsEl } from "./htmlEls.js";
 
 const divSyncState = getTradeDivInSync()
 if (!divSyncState) {
@@ -33,7 +34,7 @@ if (!divSyncState) {
     },
     cols: {
       date: { label: "Date", format: i => i },
-      name: { label: "Stock Name", format: i => i, css: () => "!text-left " },
+      name: { label: "Stock Name", format: i => i, css: () => "!text-left " }, // TOREVIEW <div text-left>
       amt: { label: "Amount", format: num => numComma(num, 2) }
     },
     foot: {
@@ -49,8 +50,8 @@ if (!divSyncState) {
     const tbody = tBodyEl(divsTableConfig, divs)
     const tfoot = tFootEl(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
-    const details = detailsEl(table, "annual", false, // table, name, open
-      `${year} Dividends ($${numComma(total)})`)
+    const details = detailsEl(table, "annual", false, // table, group name, open
+      `${year} Dividends ($${numComma(total)} ⟶ $${numComma(total / 12)}/mth)`)
     getEl("rootDiv").append(details)
   }
 
