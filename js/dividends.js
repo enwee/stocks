@@ -28,7 +28,7 @@ if (!divSyncState) {
   const divsTableConfig = {
     css: {
       head: classes.header,
-      rows: classes.base(),
+      rows: classes.base("smaller"),
       indexed: i => classes.altBG(i % 2),
       foot: classes.text + classes.padding
     },

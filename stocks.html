@@ -44,8 +44,8 @@
           <tr>
             <template x-for="{label} in columns">
               <th :class="css.header+`${!label?css.stickyLeft:label==='Last'?css.stickyLeft2:''}`" x-html="label?label:
-                `<button :class='css.divsBtn' @click='open(location.origin+PATHMOD+DIVSPAGE)'><img
-                  src='images/money.png' :class='css.divsImg'></button>`">
+                `<button :class='css.divsBtn' @click='open(location.origin+PATHMOD+DIVSPAGE)'>
+                  <img src='images/money.png' :class='css.divsImg'></button>`">
               </th>
             </template>
           </tr>

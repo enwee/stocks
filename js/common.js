@@ -4,8 +4,8 @@ export const classes = {
   header: "pb-2 px-2 text-gray-400 whitespace-nowrap ",
   border: "border border-gray-400 ",
   padding: "py-1 px-2 ",
-  text: "text-lg text-gray-400 text-right ",
-  base: function () { return this.border + this.padding + this.text },
+  text: function (size = "lg") { return (size === "lg" ? "text-lg " : "") + "text-gray-400 text-right " },
+  base: function (size = "lg") { return this.border + this.padding + this.text(size) },
   altBG: bool => bool ? "bg-slate-900 " : "bg-stone-900 ",
   green: "!text-emerald-500 ",
   red: "!text-rose-700 "
