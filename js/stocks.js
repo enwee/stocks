@@ -137,6 +137,7 @@ const xData = () => ({
     interval: 0,
   },
   intervalId: 0,
+  use: get("use"),
   async updateSelf(initial = false) {
     if (initial || updateDue(this.time.quotes, this.time.interval)) {
       // do not updateStocks(intervalTime) cos intervalTime === 0 for initial
