@@ -1,12 +1,13 @@
-export const PATHMOD = location.host === "enwee.github.io" ? "/stocks" : ""
+export const PATHMOD = location.hostname === "enwee.github.io" ? "/stocks" : ""
 
 export const classes = {
   header: "pb-2 px-2 text-gray-400 whitespace-nowrap ",
   border: "border border-gray-400 ",
   padding: "py-1 px-2 ",
-  text: function (size = "lg") { return (size === "lg" ? "text-lg " : "") + "text-gray-400 text-right " },
-  base: function (size = "lg") { return this.border + this.padding + this.text(size) },
+  text: "text-gray-400 text-right ",
+  base: function () { return this.border + this.padding + this.text },
   altBG: bool => bool ? "bg-slate-900 " : "bg-stone-900 ",
+  summaryDetail: "py-1 text-violet-400 ",
   green: "!text-emerald-500 ",
   red: "!text-rose-700 "
 }

@@ -51,7 +51,7 @@ if (!divSyncState) {
     const tfoot = tFootEl(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
     const details = detailsEl(table, "annual", false, // table, group name, open
-      `${year} Dividends ($${numComma(total)} ⟶ $${numComma(total / 12)}/mth)`)
+      `${year} Dividends - $${numComma(total)} ($${numComma(total / 12)}/mth)`)
     getEl("rootDiv").append(details)
   }
 

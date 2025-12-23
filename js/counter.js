@@ -2,7 +2,9 @@ import { classes, numComma } from "./common.js"
 import { getQuotesPromise, getNames, getTrades, getDivs, getTradeDivInSync } from "./storage.js"
 import { fxLabelHTML, gainLossHTML, getEl, newEl, tHeadEl, tBodyEl, tFootEl, detailsEl } from "./htmlEls.js"
 
-const symbol = location.search.slice(1)
+const params = new URLSearchParams(location.search)
+const symbol = params.get("code")
+const open = params.get("open")
 if (symbol) document.title = symbol
 
 const trades = getTrades(symbol)
@@ -93,12 +95,12 @@ if (tradeDivInSync) {
     }
   }
 
-  for (const [index, [year, { divs, total }]] of Object.entries(divsByYear).reverse().entries()) {
+  for (const [year, { divs, total }] of Object.entries(divsByYear).reverse()) {
     const thead = tHeadEl(divsTableConfig)
-    const tbody = tBodyEl(divsTableConfig, divs)
+    const tbody = tBodyEl(divsTableConfig, divs.reverse())
     const tfoot = tFootEl(divsTableConfig, { 3: total })
     const table = newEl("table", {}, thead, tbody, tfoot)
-    const details = detailsEl(table, symbol, index === 0, // table, group name, open
+    const details = detailsEl(table, symbol, open === year, // table, group name, open
       `${year} Dividends ($${numComma(total)}`,
       USD ? fxLabelHTML({ asEl: true, curr: "SGD" }) : "",
       ")")

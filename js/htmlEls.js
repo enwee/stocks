@@ -91,6 +91,6 @@ export const tFootEl = ({ css, foot }, data) => {
 }
 
 export const detailsEl = (table, name, open, ...summaryNodes) => {
-  const summary = newEl("summary", { css: "py-1 text-xl text-violet-400" }, ...summaryNodes)
+  const summary = newEl("summary", { css: classes.summaryDetail }, ...summaryNodes)
   return newEl("details", { css: "py-1 w-max", name, open }, summary, table)
 }
