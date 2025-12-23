@@ -1,4 +1,4 @@
-import { sortByDate, numComma, classes } from "./common.js";
+import { classes, sortByDate, numComma, shortenName } from "./common.js";
 import { getTradeDivInSync, getDivs, getQuotesPromise, getNames } from "./storage.js";
 import { getEl, newEl, tHeadEl, tBodyEl, tFootEl, detailsEl } from "./htmlEls.js";
 
@@ -28,13 +28,13 @@ if (!divSyncState) {
   const divsTableConfig = {
     css: {
       head: classes.header,
-      rows: classes.base("smaller"),
+      rows: classes.base() + "pl-1 ",
       indexed: i => classes.altBG(i % 2),
       foot: classes.text + classes.padding
     },
     cols: {
       date: { label: "Date", format: i => i },
-      name: { label: "Stock Name", format: i => i, css: () => "!text-left " }, // TOREVIEW <div text-left>
+      name: { label: "Stock", format: shortenName, css: () => "!text-left text-sm/3.5 max-w-22 " }, // TOREVIEW <div text-left>
       amt: { label: "Amount", format: num => numComma(num, 2) }
     },
     foot: {

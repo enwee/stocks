@@ -32,4 +32,25 @@ export const sortByDate = dateKeyFn => (a, b) => {
   return 0
 }
 
-// add/use name shortening function from stocks.js
+export const shortenName = name => {
+  const words = name.split(" ")
+  const firstWord = words[0]
+  if (firstWord.length > 9) {
+    for (let i = 7; i < firstWord.length; i++) {
+      // after 8th letter find the next Capital
+      if (firstWord[i] === firstWord[i].toUpperCase()) {
+        // convert long first word into 2 at the first capital letter
+        words.splice(0, 1, firstWord.slice(0, i), firstWord.slice(i))
+        name = words.join(" ")
+        break
+      }
+    }
+  }
+
+  if (words.length > 2) {
+    // take only the first 3 words; if still too long, take only the first 2 words
+    name = words.slice(0, 3).join(" ")
+    name = name.length > 17 ? words.slice(0, 2).join(" ") : name
+  }
+  return name
+}
